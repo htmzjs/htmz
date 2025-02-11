@@ -53,7 +53,7 @@ HTMZ brings the power of reactive programming directly to your HTML. It allows y
   <button data-onclick="increment">Increment</button>
   <div data-text="Count: ${count}"></div>
 
-  <div data-watch="count" data-if="count % 5 == 0, toggleHidden()" hidden>
+  <div data-watch="count" data-if="count % 5 == 0; toggleHidden()" hidden>
     Content......
   </div>
 </div>
@@ -68,8 +68,10 @@ HTMZ brings the power of reactive programming directly to your HTML. It allows y
     increment: function (state, event) {
       state.count.value += 1;
     },
-    toggleHidden: function () => () => {
-      this.hidden = !this.hidden
+    toggleHidden: function () {
+      return () => {
+        this.hidden = !this.hidden
+      }
     }
   });
 </script>
