@@ -1,6 +1,9 @@
-import type { InitHandler } from "./handler";
-import { initHandlers } from "./handler";
+import type { InitHandler } from "./initHandlers";
 import type { Actions, State } from "./state";
+import type { updateHandler } from "./updateHandlers";
+
+import { initHandlers } from "./initHandlers";
+import { updateHandlers } from "./updateHandlers";
 import { evaluate } from "./utils";
 
 export class HTMZNode {
@@ -23,34 +26,12 @@ export class HTMZNode {
   }
 }
 
-type handler = (node: HTMZNode) => void;
-
-const handlers: Record<string, handler> = {
-  text: ({ element, stateValue }) => {
-    const text = element.dataset.text ?? "";
-    const textContent = evaluate(`return \`${text}\``, {
-      ...stateValue,
-    });
-    element.innerText = textContent;
-  },
-  if: ({ element, state, stateValue, actions }) => {
-    const value = element.dataset.if;
-    const [condition, func] = value!.split(";") ?? ["false", ""];
-    const [functionName] = func!.trim().split("(");
-    const action = actions[functionName!];
-    if (!action) return;
-    evaluate(`if(${condition})${func}`, {
-      [functionName!]: action.bind(element)(state, null),
-      ...stateValue,
-    });
-  },
-};
-
 export class HTMZProp<T> {
   private nodes = new Map<HTMZNode, HTMZNode>();
   private _value;
   private key;
-  handlers: Record<string, handler> = {};
+
+  updateHandlers: Record<string, updateHandler> = {};
 
   constructor(key: string, value: T) {
     this._value = value;
@@ -59,15 +40,15 @@ export class HTMZProp<T> {
 
   addNode(node: HTMZNode) {
     this.nodes.set(node, node);
-    this.render(node);
+    this.update(node);
   }
 
-  render(node: HTMZNode) {
+  update(node: HTMZNode) {
     for (const key of node.handlerKeys) {
-      let handler = handlers[key];
-      handler = this.handlers[key] ?? handler;
-      if (!handler) continue;
-      handler(node);
+      let updateHandler = updateHandlers[key];
+      updateHandler = this.updateHandlers[key] ?? updateHandler;
+      if (!updateHandler) continue;
+      updateHandler(node);
     }
   }
 
@@ -80,7 +61,7 @@ export class HTMZProp<T> {
     this._value = value;
     for (const [element] of this.nodes) {
       element.stateValue[this.key] = value;
-      this.render(element);
+      this.update(element);
     }
   }
 }
@@ -92,7 +73,7 @@ export type HTMZPropRecord<T extends Record<string, unknown>> = {
 export interface Plugin {
   key: string;
   init: InitHandler;
-  handler: handler;
+  update: updateHandler;
 }
 
 export class HTMZ {
@@ -105,7 +86,7 @@ export class HTMZ {
     const walker = document.createTreeWalker(element);
     const newActions =
       typeof actions == "function" ? (actions as Function)() : actions;
-    const stateValue = Object.entries<HTMZProp<unknown>>(state).reduce(
+    const stateValues = Object.entries<HTMZProp<unknown>>(state).reduce(
       (p, [key, value]) => {
         return { ...p, [key]: value.value };
       },
@@ -116,7 +97,8 @@ export class HTMZ {
     for (const key in state) {
       for (const plugin of plugins) {
         handlers[plugin.key] = plugin.init;
-        (state[key] as HTMZProp<unknown>).handlers[plugin.key] = plugin.handler;
+        (state[key] as HTMZProp<unknown>).updateHandlers[plugin.key] =
+          plugin.update;
       }
     }
 
@@ -127,10 +109,9 @@ export class HTMZ {
         const node = new HTMZNode(
           currentNode,
           state,
-          stateValue,
+          stateValues,
           actions as {}
         );
-
         const watch = currentNode.dataset?.watch ?? "";
         if (watch) {
           const props = watch.split(",") ?? [];

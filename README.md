@@ -1,8 +1,6 @@
 # HTMZ.js
 
-A minimal and lightweight library for building reactive web UIs.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+Bring reactivity to your HTML! A minimal and lightweight library for building dynamic web UIs.
 
 ## Introduction
 
@@ -15,11 +13,12 @@ HTMZ.js brings the power of reactive programming directly to your HTML. With an 
 - **Event Handling** – Attach event listeners with built-in support.
 - **Conditional Rendering** – Show or hide elements based on state.
 - **List Rendering** – Dynamically generate elements from arrays.
+- **Plugins Support** – Extend functionality with custom plugins.
 
 ## Installation
 
 ```sh
-yarn add htmzjs
+yarn add htmzjs # Or npm install htmzjs
 ```
 
 ## Usage
@@ -36,7 +35,7 @@ yarn add htmzjs
   import {
     HTMZ,
     Store,
-  } from "https://www.unpkg.com/htmzjs@1.0.0/dist/index.js";
+  } from "https://www.unpkg.com/htmzjs@1.1.0/dist/index.js";
 
   const app = document.querySelector("#app");
   const appState = Store.setState({ count: 0 });
@@ -92,6 +91,56 @@ You can dynamically generate a list of elements:
 </script>
 ```
 
+### Plugin Support
+
+HTMZ.js allows you to extend its functionality with plugins. Here’s an example of a `show` plugin:
+
+```html
+<div id="app">
+  <button data-onclick="increment">Increment</button>
+  <div data-text="Count: ${count}"></div>
+
+  <div data-watch="count" data-show="count % 5 == 0">
+    Content appears when count is a multiple of 5.
+  </div>
+</div>
+
+<script type="module">
+  import { HTMZ, Store } from "htmzjs";
+
+  const app = document.querySelector("#app")
+  const appState = Store.setState({
+    count: 0,
+  });
+  const appActions = {
+    increment: (state) => {
+      state.count.value += 1;
+    },
+  };
+
+  const showPlugin = {
+    key: "show",
+    init: (data, node) => {
+      if (evaluate("return " + data.value, node.stateValue)) {
+        node.element.hidden = false;
+      } else {
+        node.element.hidden = true;
+      }
+      node.handlerKeys.push(data.key);
+    },
+    update: (node) => {
+      if (evaluate("return " + node.element.dataset.show!, node.stateValue)) {
+        node.element.hidden = false;
+      } else {
+        node.element.hidden = true;
+      }
+    },
+  };
+
+  HTMZ.initTree(app, appState, appActions, [showPlugin]);
+</script>
+```
+
 ## License
 
-HTMZ.js is open-source and available under the [MIT License](https://opensource.org/licenses/MIT).
+HTMZ.js is open-source and available under the [MIT License](https://github.com/htmzjs/htmz/blob/main/LICENSE).

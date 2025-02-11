@@ -1,4 +1,4 @@
-import { HTMZNode } from "./htmz";
+import type { HTMZNode } from "./htmz";
 
 export type InitHandler = (
   data: { key: string; value: string },
@@ -10,10 +10,8 @@ type InitHandlers = Record<string, InitHandler>;
 export const initHandlers: InitHandlers = {
   text: (data, node) => {
     const keys = data.value.match(/(\$\{[\w-]+)\}/g) ?? [];
-
     for (const key of keys) {
       const prop = node.state[key.replace(/[${}]/g, "")];
-
       if (!prop) continue;
       node.handlerKeys.push(data.key);
       prop.addNode(node);
