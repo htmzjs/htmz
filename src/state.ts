@@ -14,10 +14,10 @@ export class Store {
 
 export type State<T extends {}> = HTMZPropRecord<T>;
 
-type Action<T extends {}> = (
+export type Action<T extends State<{}>> = (
   this: HTMLElement,
-  state: State<T>,
+  state: T,
   event: unknown | null
 ) => void;
 
-export type Actions<T extends {}> = Record<string, Action<T>>;
+export type Actions<T extends State<{}>> = Record<string, Action<T>>;

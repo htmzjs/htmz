@@ -1,29 +1,25 @@
-import { HTMZNode, HTMZProp } from "./htmz";
-import type { Actions } from "./state";
+import { HTMZNode } from "./htmz";
 
-type InitTreeHandlers = Record<
-  string,
-  (
-    data: { key: string; value: string },
-    node: HTMZNode,
-    state: Record<string, HTMZProp<unknown>>,
-    actions: Actions<{}>
-  ) => void
->;
+export type InitHandler = (
+  data: { key: string; value: string },
+  node: HTMZNode
+) => void;
 
-export const initTreeHandlers: InitTreeHandlers = {
-  text: (data, node, state, actions) => {
+type InitHandlers = Record<string, InitHandler>;
+
+export const initHandlers: InitHandlers = {
+  text: (data, node) => {
     const keys = data.value.match(/(\$\{[\w-]+)\}/g) ?? [];
 
     for (const key of keys) {
-      const prop = state[key.replace(/[${}]/g, "")];
+      const prop = node.state[key.replace(/[${}]/g, "")];
 
       if (!prop) continue;
-      node.handler.push("text");
+      node.handlerKeys.push(data.key);
       prop.addNode(node);
     }
   },
-  range: (data, node, state, actions) => {
+  range: (data, node) => {
     const range = Number(data.value);
     const fragment = document.createDocumentFragment();
     let i = 0;
@@ -35,6 +31,6 @@ export const initTreeHandlers: InitTreeHandlers = {
     node.element.parentElement!.appendChild(fragment);
   },
   if: (data, node) => {
-    node.handler.push(data.key);
+    node.handlerKeys.push(data.key);
   },
 };
