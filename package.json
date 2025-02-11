@@ -1,0 +1,51 @@
+{
+  "name": "htmzjs",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "author": "Pebrian",
+  "license": "MIT",
+  "keywords": [
+    "html",
+    "reactive",
+    "javascript",
+    "typescript"
+  ],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vitest",
+    "build": "tsup",
+    "check-exports": "attw --pack .",
+    "lint": "tsc",
+    "test": "vitest run",
+    "ci": "yarn build && yarn check-exports && yarn lint && yarn test",
+    "prepublishOnly": "npm run ci",
+    "local-release": "changeset version && changeset publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/htmzjs/htmz.git",
+    "directory": "packages/create-vite"
+  },
+  "bugs": {
+    "url": "https://github.com/htmzjs/htmz/issues"
+  },
+  "homepage": "https://github.com/htmzjs/htmz",
+  "packageManager": "yarn@4.6.0",
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.17.3",
+    "@changesets/cli": "^2.27.12",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.cjs"
+    }
+  }
+}
