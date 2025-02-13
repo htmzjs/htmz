@@ -108,7 +108,7 @@ HTMZ.js allows you to extend its functionality with plugins. Here’s an example
 <script type="module">
   import { HTMZ, Store } from "htmzjs";
 
-  const app = document.querySelector("#app")
+  const app = document.querySelector("#app");
   const appState = Store.setState({
     count: 0,
   });
@@ -129,7 +129,7 @@ HTMZ.js allows you to extend its functionality with plugins. Here’s an example
       node.handlerKeys.push(data.key);
     },
     update: (node) => {
-      if (evaluate("return " + node.element.dataset.show!, node.stateValue)) {
+      if (evaluate("return " + node.element.dataset.show, node.stateValue)) {
         node.element.hidden = false;
       } else {
         node.element.hidden = true;
