@@ -30,7 +30,7 @@ yarn add htmzjs # Or npm install htmzjs
   <div data-text="Count: ${count}"></div>
 </div>
 
-<script type="module">
+<script defer type="module">
   import * as htmz from "https://www.unpkg.com/htmzjs@2.0.0/dist/index.js";
 
   const app = document.querySelector("#app");
