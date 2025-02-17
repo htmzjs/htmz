@@ -40,14 +40,59 @@ yarn add htmzjs # Or npm install htmzjs
     root: app,
     state: appState,
     actions: {
-      increment(state) {
-        state.count.value += 1;
+      increment(state, rootState) {
+        rootState.count.value += 1;
       },
     }
   });
 </script>
 ```
 
+## API Reference
+
+### `setState(data)`
+
+**Description:**
+Creates a new application state based on the provided data. 
+
+**Parameters:**
+- **`data`** (`object`): An object representing the initial state.
+
+**Returns:** 
+A new state object.
+
+**Example:**
+```javascript
+const state = htmz.setState({ count: 0 })
+```
+
+### `initTree(config)`
+
+**Description:**  
+Initializes the DOM traversal using the TreeWalker API and configures the application's state, actions, plugins, and components. This function serves as the core setup mechanism, ensuring that all elements in the DOM are properly initialized and reactive.
+
+**Parameters:**
+- **`config`** (`object`): 
+
+**Returns:** 
+`void`.
+
+**Example:**
+```javascript
+  const app = document.querySelector("#app");
+  const appState = htmz.setState({ count: 0 });
+
+  htmz.initTree({
+    root: app,
+    state: appState,
+    actions: {
+      increment(state, rootState, event) {
+        rootState.count.value += 1
+      },
+    },
+  });
+```
+
 ## License
 
-HTMZ.js is open-source and available under the [MIT License](https://github.com/htmzjs/htmz/blob/main/LICENSE).
+HTMZ.js is open-source and available under the [MIT License](./LICENSE).
