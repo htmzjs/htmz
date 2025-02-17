@@ -1,6 +1,6 @@
 import { handlers } from "./handlers";
-import { Store, type Action, type Actions, type State } from "./state";
-import { evaluate, evaluateReturn, stateToKeyValuePair } from "./utils";
+import { setState, type Action, type Actions, type State } from "./state";
+import { evaluate, evaluateReturn, extractValues } from "./utils";
 
 export class HTMZNode {
   handlerKeys: string[] = [];
@@ -9,6 +9,7 @@ export class HTMZNode {
   stateValues;
   element;
   actions;
+  components;
   plugins;
 
   constructor(
@@ -17,6 +18,10 @@ export class HTMZNode {
     rootState: Record<string, HTMZProp<unknown>>,
     stateValues: Record<string, unknown>,
     actions: Record<string, Action<{}>>,
+    components: Record<
+      string,
+      ComponentConstructor | (() => Promise<ComponentConstructor>)
+    >,
     plugins?: Plugins
   ) {
     this.element = element;
@@ -24,6 +29,7 @@ export class HTMZNode {
     this.rootState = rootState;
     this.stateValues = stateValues;
     this.actions = actions;
+    this.components = components;
     this.plugins = plugins;
   }
 }
@@ -31,8 +37,6 @@ export class HTMZNode {
 export class HTMZProp<T> {
   private nodes = new Map<HTMZNode, HTMZNode>();
   private _value;
-
-  plugins: Plugins = {};
 
   constructor(value: T) {
     this._value = value;
@@ -49,7 +53,11 @@ export class HTMZProp<T> {
       const key = node.handlerKeys[i] ?? "";
       const value = node.element.dataset[key] ?? "";
       let updateHandler = handlers[key]?.update;
-      updateHandler = this.plugins[key]?.update ?? updateHandler;
+
+      if (node.plugins) {
+        updateHandler = node.plugins[key]?.update ?? updateHandler;
+      }
+
       if (!updateHandler) continue;
       updateHandler({ key, value }, node);
     }
@@ -63,7 +71,7 @@ export class HTMZProp<T> {
     if (value == this.value) return;
     this._value = value;
     for (const [node] of this.nodes) {
-      node.stateValues = stateToKeyValuePair(node.state);
+      node.stateValues = extractValues(node.state);
       this.update(node);
     }
   }
@@ -85,95 +93,171 @@ export interface PluginHandlers {
 
 export type Plugins = Record<string, PluginHandlers>;
 
-export class HTMZ {
-  static initTree<T extends State<{}>>(
-    element: HTMLElement,
-    rootState: T,
-    rootActions: Actions<T> | (() => Actions<T>),
-    plugins?: Plugins
+export interface ComponentConstructor {
+  new (...params: any[]): HTMLElement;
+  root: HTMLElement | ShadowRoot | null;
+  state: State<any>;
+  actions: Actions<any>;
+}
+
+const shadowRootModes = {
+  closed: function (this: HTMLElement) {
+    Component.root = this.attachShadow({ mode: "closed" });
+  },
+  open: function (this: HTMLElement) {
+    Component.root = this.attachShadow({ mode: "open" });
+  },
+  none: function (this: HTMLElement) {
+    Component.root = this;
+  },
+};
+
+export class Component extends HTMLElement {
+  static root: HTMLElement | ShadowRoot | null;
+  static state: State<any> = {};
+  static actions: Actions<typeof Component.state> = {};
+
+  constructor(
+    {
+      shadowRootMode = "closed",
+      template = "",
+    }: {
+      shadowRootMode?: keyof typeof shadowRootModes;
+      template?: string;
+    } = { template: "", shadowRootMode: "closed" }
   ) {
-    const walker = document.createTreeWalker(element);
-    const actions = (
-      typeof rootActions == "function"
-        ? (rootActions as Function)()
-        : rootActions
-    ) as Actions<T>;
+    super();
+    shadowRootModes[shadowRootMode].bind(this)();
+    Component.root!.setHTMLUnsafe(template);
+  }
+}
 
-    if (plugins) {
-      for (const key in rootState) {
-        (rootState[key] as HTMZProp<unknown>).plugins = plugins;
+export interface InitTreeConfig<T extends State<{}>> {
+  root: HTMLElement | ShadowRoot;
+  state?: T;
+  actions?: Actions<T>;
+  components?: Record<
+    string,
+    ComponentConstructor | (() => Promise<ComponentConstructor>)
+  >;
+  plugins?: Plugins;
+}
+
+export function initTree<T extends State<{}>>({
+  root,
+  state = {} as T,
+  actions = {},
+  components = {},
+  plugins,
+}: InitTreeConfig<T>) {
+  const walker = document.createTreeWalker(root);
+
+  while (walker.nextNode()) {
+    const currentNode = walker.currentNode! as HTMLElement & {
+      state: State<{}>;
+    };
+
+    if (currentNode instanceof HTMLElement) {
+      const parentState =
+        (currentNode.parentElement! as HTMLElement & { state: State<{}> })
+          ?.state ?? {};
+
+      const datasetState = currentNode.dataset.state ?? "{}";
+      const newDatasetState = datasetState
+        .replace(/\}$/, `,$el,$select,$selectAll}`)
+        .replace(/^\{\,/, "{");
+
+      const data = evaluateReturn(newDatasetState, {
+        ...extractValues(state),
+        ...extractValues(parentState),
+        $el: currentNode,
+        $select: (selectors: string) => currentNode.querySelector(selectors),
+        $selectAll: (selectors: string) => {
+          return currentNode.querySelectorAll(selectors);
+        },
+      });
+
+      delete currentNode.dataset.state;
+
+      currentNode.state = { ...parentState, ...setState(data) };
+
+      const newState = { ...state, ...currentNode.state };
+
+      const node = new HTMZNode(
+        currentNode,
+        newState,
+        state,
+        extractValues(newState),
+        actions as {},
+        components,
+        plugins
+      );
+
+      const watch = currentNode.dataset.watch ?? "";
+      if (watch) {
+        for (const prop of watch.split(",")) {
+          const state = node.state[prop as keyof typeof node.state]!;
+          state.addNode(node);
+        }
       }
-    }
 
-    while (walker.nextNode()) {
-      const currentNode = walker.currentNode! as HTMLElement & {
-        state: State<{}>;
-      };
+      const oninit = currentNode.dataset.oninit ?? "";
+      if (oninit) {
+        const [functionName] = oninit.split("(") ?? [""];
+        const action = actions[functionName!];
+        if (action) {
+          evaluate(oninit, {
+            [functionName!]: action.bind(currentNode)({
+              state: node.state as T,
+              rootState: node.rootState as T,
+              event: null,
+            }),
+            ...node.stateValues,
+          });
+        }
+      }
 
-      if (currentNode instanceof HTMLElement) {
-        const parentState =
-          (currentNode.parentElement! as HTMLElement & { state: State<{}> })
-            ?.state ?? {};
+      const init = currentNode.dataset.init ?? "";
+      evaluate(init, currentNode.state);
 
-        const datasetState = currentNode.dataset.state || "{}";
-
-        const data = evaluateReturn(datasetState, {
-          ...stateToKeyValuePair(rootState),
-          ...stateToKeyValuePair(parentState),
-        });
-
-        currentNode.state = { ...parentState, ...Store.setState(data) };
-
-        const state = { ...rootState, ...currentNode.state };
-
-        const node = new HTMZNode(
-          currentNode,
-          state,
-          rootState,
-          stateToKeyValuePair(state),
-          actions as {},
-          plugins
-        );
-
-        const watch = currentNode.dataset.watch ?? "";
-        if (watch) {
-          for (const prop of watch.split(",")) {
-            const state = node.state[prop as keyof typeof node.state]!;
-            state.addNode(node);
-          }
+      for (const [key, value] of Object.entries(currentNode.dataset)) {
+        if (key.startsWith(":")) {
+          currentNode.setAttribute(
+            key.substring(1),
+            evaluateReturn(`\`${value!}\``, node.stateValues)
+          );
         }
 
-        for (const [key, value] of Object.entries(currentNode.dataset)) {
-          if (key.startsWith("on")) {
-            const event = key as keyof GlobalEventHandlers;
-            if (typeof currentNode[event] == "undefined") continue;
+        if (key.startsWith("on")) {
+          const event = key as keyof GlobalEventHandlers;
+          if (typeof currentNode[event] == "undefined") continue;
 
-            const [functionName] = value!.split("(") ?? [""];
-            const action = actions[functionName!];
-            if (!action) continue;
+          const [functionName] = value!.split("(") ?? [""];
+          const action = actions[functionName!];
+          if (!action) continue;
 
-            currentNode[event] = function (event: unknown) {
-              evaluate(value!, {
-                [functionName!]: action.bind(currentNode)(
-                  node.state as T,
-                  node.rootState as T,
-                  event
-                ),
-                ...node.stateValues,
-              });
-            };
-            continue;
-          }
-
-          let initHandler = handlers[key]?.init;
-
-          if (plugins) initHandler = plugins[key]?.init ?? initHandler;
-          if (!initHandler) continue;
-
-          node.handlerKeys.push(key);
-          initHandler({ key, value: value! }, node);
+          currentNode[event] = function (event: unknown) {
+            evaluate(value!, {
+              [functionName!]: action.bind(currentNode)({
+                state: node.state as T,
+                rootState: node.rootState as T,
+                event: event,
+              }),
+              ...node.stateValues,
+            });
+          };
+          continue;
         }
+
+        let initHandler = handlers[key]?.init;
+
+        if (plugins) initHandler = plugins[key]?.init ?? initHandler;
+        if (!initHandler) continue;
+
+        node.handlerKeys.push(key);
+        initHandler({ key, value: value! }, node);
       }
     }
   }
+  return root;
 }

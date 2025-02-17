@@ -30,6 +30,7 @@ const RAW_RUNTIME_STATE =
           ["@arethetypeswrong/cli", "npm:0.17.3"],\
           ["@changesets/cli", "npm:2.27.12"],\
           ["esbuild", "npm:0.25.0"],\
+          ["happy-dom", "npm:17.1.0"],\
           ["tsup", "virtual:013a5e1157a38bcf7d2ef606697370aadb42f1231a937723bf7d29e06f8053096b92bed4b4ca20319876d06ab88d9b81c4b1daf51640d162761559eee639f2a6#npm:8.3.6"],\
           ["typescript", "patch:typescript@npm%3A5.7.3#optional!builtin<compat/typescript>::version=5.7.3&hash=5786d5"],\
           ["vitest", "virtual:013a5e1157a38bcf7d2ef606697370aadb42f1231a937723bf7d29e06f8053096b92bed4b4ca20319876d06ab88d9b81c4b1daf51640d162761559eee639f2a6#npm:3.0.5"]\
@@ -2070,6 +2071,17 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["happy-dom", [\
+      ["npm:17.1.0", {\
+        "packageLocation": "../../../AppData/Local/Yarn/Berry/cache/happy-dom-npm-17.1.0-a6243c8b54-10c0.zip/node_modules/happy-dom/",\
+        "packageDependencies": [\
+          ["happy-dom", "npm:17.1.0"],\
+          ["webidl-conversions", "npm:7.0.0"],\
+          ["whatwg-mimetype", "npm:3.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["has-flag", [\
       ["npm:4.0.0", {\
         "packageLocation": "../../../AppData/Local/Yarn/Berry/cache/has-flag-npm-4.0.0-32af9f0536-10c0.zip/node_modules/has-flag/",\
@@ -2096,6 +2108,7 @@ const RAW_RUNTIME_STATE =
           ["@arethetypeswrong/cli", "npm:0.17.3"],\
           ["@changesets/cli", "npm:2.27.12"],\
           ["esbuild", "npm:0.25.0"],\
+          ["happy-dom", "npm:17.1.0"],\
           ["tsup", "virtual:013a5e1157a38bcf7d2ef606697370aadb42f1231a937723bf7d29e06f8053096b92bed4b4ca20319876d06ab88d9b81c4b1daf51640d162761559eee639f2a6#npm:8.3.6"],\
           ["typescript", "patch:typescript@npm%3A5.7.3#optional!builtin<compat/typescript>::version=5.7.3&hash=5786d5"],\
           ["vitest", "virtual:013a5e1157a38bcf7d2ef606697370aadb42f1231a937723bf7d29e06f8053096b92bed4b4ca20319876d06ab88d9b81c4b1daf51640d162761559eee639f2a6#npm:3.0.5"]\
@@ -3736,7 +3749,7 @@ const RAW_RUNTIME_STATE =
           ["chai", "npm:5.1.2"],\
           ["debug", "virtual:643ed7cc338bcf145a82d8b05b3bef6bcf150ca545df386225596f10ce53cc90b88b3ca83e348ade1ccea5f3f8e76c92d2f0e2ba544da60d40aff9921c56872d#npm:4.4.0"],\
           ["expect-type", "npm:1.1.0"],\
-          ["happy-dom", null],\
+          ["happy-dom", "npm:17.1.0"],\
           ["jsdom", null],\
           ["magic-string", "npm:0.30.17"],\
           ["pathe", "npm:2.0.2"],\
@@ -3771,6 +3784,22 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../../AppData/Local/Yarn/Berry/cache/webidl-conversions-npm-4.0.2-1d159e6409-10c0.zip/node_modules/webidl-conversions/",\
         "packageDependencies": [\
           ["webidl-conversions", "npm:4.0.2"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:7.0.0", {\
+        "packageLocation": "../../../AppData/Local/Yarn/Berry/cache/webidl-conversions-npm-7.0.0-e8c8e30c68-10c0.zip/node_modules/webidl-conversions/",\
+        "packageDependencies": [\
+          ["webidl-conversions", "npm:7.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["whatwg-mimetype", [\
+      ["npm:3.0.0", {\
+        "packageLocation": "../../../AppData/Local/Yarn/Berry/cache/whatwg-mimetype-npm-3.0.0-5b617710c1-10c0.zip/node_modules/whatwg-mimetype/",\
+        "packageDependencies": [\
+          ["whatwg-mimetype", "npm:3.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
