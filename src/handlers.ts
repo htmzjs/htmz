@@ -1,4 +1,9 @@
-import { initTree, type ComponentConstructor, type Plugins } from "./htmz";
+import {
+  Component,
+  initTree,
+  type ComponentConstructor,
+  type Plugins,
+} from "./htmz";
 import { evaluate, evaluateReturn, toKebabCase } from "./utils";
 
 export const handlers: Plugins = {
@@ -14,10 +19,6 @@ export const handlers: Plugins = {
 
       let componentClass = components[componentName] as ComponentConstructor;
       if (!componentClass) return;
-
-      if (componentName == "router-outlet") {
-        delete components[componentName];
-      }
 
       let loading;
       if (!componentClass?.prototype) {
@@ -36,6 +37,10 @@ export const handlers: Plugins = {
           const componentState = loadingClass.state;
           const componentActions = loadingClass.actions;
 
+          Component.root = null;
+          Component.state = {};
+          Component.actions = {};
+
           initTree({
             root: componentRoot,
             state: { ...state, ...componentState },
@@ -43,10 +48,6 @@ export const handlers: Plugins = {
             components: components,
             plugins: plugins,
           });
-
-          // loadingClass.root = null;
-          // loadingClass.state = {};
-          // loadingClass.actions = {};
 
           element.replaceChildren(loading);
         }
@@ -63,9 +64,10 @@ export const handlers: Plugins = {
       const componentRoot = componentClass.root as HTMLElement;
       const componentState = componentClass.state;
       const componentActions = componentClass.actions;
-      componentClass.root = null;
-      componentClass.state = {};
-      componentClass.actions = {};
+
+      Component.root = null;
+      Component.state = {};
+      Component.actions = {};
 
       initTree({
         root: componentRoot,
@@ -110,6 +112,10 @@ export const handlers: Plugins = {
           const componentState = loadingClass.state;
           const componentActions = loadingClass.actions;
 
+          Component.root = null;
+          Component.state = {};
+          Component.actions = {};
+
           initTree({
             root: componentRoot,
             state: { ...state, ...componentState },
@@ -117,10 +123,6 @@ export const handlers: Plugins = {
             components: components,
             plugins: plugins,
           });
-
-          // loadingClass.root = null;
-          // loadingClass.state = {};
-          // loadingClass.actions = {};
 
           element.replaceChildren(loading);
         }
@@ -137,9 +139,10 @@ export const handlers: Plugins = {
       const componentRoot = componentClass.root as HTMLElement;
       const componentState = componentClass.state;
       const componentActions = componentClass.actions;
-      componentClass.root = null;
-      componentClass.state = {};
-      componentClass.actions = {};
+
+      Component.root = null;
+      Component.state = {};
+      Component.actions = {};
 
       initTree({
         root: componentRoot,

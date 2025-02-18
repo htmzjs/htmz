@@ -2,6 +2,45 @@ import { handlers } from "./handlers";
 import { setState, type Action, type Actions, type State } from "./state";
 import { evaluate, evaluateReturn, extractValues } from "./utils";
 
+export interface ComponentConstructor {
+  new (...params: any[]): HTMLElement;
+  root: HTMLElement | ShadowRoot | null;
+  state: State<any>;
+  actions: Actions<any>;
+}
+
+const shadowRootModes = {
+  closed: function (this: HTMLElement) {
+    Component.root = this.attachShadow({ mode: "closed" });
+  },
+  open: function (this: HTMLElement) {
+    Component.root = this.attachShadow({ mode: "open" });
+  },
+  none: function (this: HTMLElement) {
+    Component.root = this;
+  },
+};
+
+export class Component extends HTMLElement {
+  static root: HTMLElement | ShadowRoot | null;
+  static state: State<any> = {};
+  static actions: Actions<typeof Component.state> = {};
+
+  constructor(
+    {
+      shadowRootMode = "closed",
+      template = "",
+    }: {
+      shadowRootMode?: keyof typeof shadowRootModes;
+      template?: string;
+    } = { template: "", shadowRootMode: "closed" }
+  ) {
+    super();
+    shadowRootModes[shadowRootMode].bind(this)();
+    Component.root!.setHTMLUnsafe(template);
+  }
+}
+
 export class HTMZNode {
   handlerKeys: string[] = [];
   state;
@@ -92,45 +131,6 @@ export interface PluginHandlers {
 }
 
 export type Plugins = Record<string, PluginHandlers>;
-
-export interface ComponentConstructor {
-  new (...params: any[]): HTMLElement;
-  root: HTMLElement | ShadowRoot | null;
-  state: State<any>;
-  actions: Actions<any>;
-}
-
-const shadowRootModes = {
-  closed: function (this: HTMLElement) {
-    Component.root = this.attachShadow({ mode: "closed" });
-  },
-  open: function (this: HTMLElement) {
-    Component.root = this.attachShadow({ mode: "open" });
-  },
-  none: function (this: HTMLElement) {
-    Component.root = this;
-  },
-};
-
-export class Component extends HTMLElement {
-  static root: HTMLElement | ShadowRoot | null;
-  static state: State<any> = {};
-  static actions: Actions<typeof Component.state> = {};
-
-  constructor(
-    {
-      shadowRootMode = "closed",
-      template = "",
-    }: {
-      shadowRootMode?: keyof typeof shadowRootModes;
-      template?: string;
-    } = { template: "", shadowRootMode: "closed" }
-  ) {
-    super();
-    shadowRootModes[shadowRootMode].bind(this)();
-    Component.root!.setHTMLUnsafe(template);
-  }
-}
 
 export interface InitTreeConfig<T extends State<{}>> {
   root: HTMLElement | ShadowRoot;

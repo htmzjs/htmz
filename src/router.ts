@@ -2,17 +2,6 @@ import { initTree, type ComponentConstructor, type Plugins } from "./htmz";
 import { setState, type Actions, type State } from "./state";
 import { matchDynamicRoute, toKebabCase } from "./utils";
 
-export interface RouterConfig<T extends State<{}>> {
-  app: ComponentConstructor;
-  state?: T;
-  actions?: Actions<T>;
-  components?: Record<
-    string,
-    ComponentConstructor | (() => Promise<ComponentConstructor>)
-  >;
-  plugins?: Plugins;
-}
-
 export interface Route {
   path: string;
   component: ComponentConstructor | (() => Promise<ComponentConstructor>);
@@ -25,6 +14,17 @@ export function createRoutes(routes: Route[]): Routes {
   return routes.reduce((routes, route) => {
     return { ...routes, [route.path]: route };
   }, {});
+}
+
+export interface RouterConfig<T extends State<{}>> {
+  app: ComponentConstructor;
+  state?: T;
+  actions?: Actions<T>;
+  components?: Record<
+    string,
+    ComponentConstructor | (() => Promise<ComponentConstructor>)
+  >;
+  plugins?: Plugins;
 }
 
 export class Router<T extends State<{}>> {
@@ -47,15 +47,55 @@ export class Router<T extends State<{}>> {
   }: RouterConfig<T>) {
     this.app = app;
     Router.state = state;
-    Router.actions = actions as Actions<{}>;
+    Router.actions = {
+      ...actions,
+      navigateTo() {
+        return (url?: string, data: unknown = null) => {
+          Router.navigateTo(url, data);
+        };
+      },
+    };
     Router.components = components;
     Router.plugins = plugins;
+  }
+
+  setState(data: {}) {
+    Router.state = setState(data);
+    return this;
+  }
+
+  setActions(actions: Actions<T>) {
+    Router.actions = {
+      ...actions,
+      navigateTo() {
+        return (url?: string, data: unknown = null) => {
+          Router.navigateTo(url, data);
+        };
+      },
+    };
+    return this;
   }
 
   setRoutes(routes: Route[]) {
     Router.routes = routes.reduce((routes, route) => {
       return { ...routes, [route.path]: route };
     }, {});
+
+    return this;
+  }
+
+  setComponents(
+    components: Record<
+      string,
+      ComponentConstructor | (() => Promise<ComponentConstructor>)
+    >
+  ) {
+    Router.components = components;
+    return this;
+  }
+
+  setPlugins(plugins: Plugins) {
+    Router.plugins = plugins;
     return this;
   }
 
@@ -78,21 +118,14 @@ export class Router<T extends State<{}>> {
       this.routes[url || "/"]! ?? matchDynamicRoute(this.routes, url);
     this.components["router-outlet"] = route.component;
 
-    const { $params, $navigateTo } = setState({
+    const { $params } = setState({
       $params: route.params,
-      $navigateTo: Router.navigateTo,
     });
-
-    function navigateTo() {
-      return (url?: string, data: unknown = null) => {
-        Router.navigateTo(url, data);
-      };
-    }
 
     initTree({
       root: this.root,
-      state: { ...this.state, $params, $navigateTo },
-      actions: { ...this.actions, navigateTo },
+      state: { ...this.state, $params },
+      actions: this.actions,
       components: this.components,
       plugins: this.plugins,
     });
