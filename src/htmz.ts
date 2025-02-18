@@ -24,7 +24,7 @@ const shadowRootModes = {
 export class Component extends HTMLElement {
   static root: HTMLElement | ShadowRoot | null;
   static state: State<any> = {};
-  static actions: Actions<typeof Component.state> = {};
+  static actions: Actions<State<any>> = {};
 
   constructor(
     {
@@ -87,10 +87,72 @@ export class HTMZProp<T> {
   }
 
   update(node: HTMZNode) {
+    const watch = node.element.dataset.watch ?? "";
+    if (watch) {
+      for (const prop of watch.split(",")) {
+        const state = node.state[prop as keyof typeof node.state]!;
+        state.addNode(node);
+      }
+    }
+
+    const oninit = node.element.dataset.oninit ?? "";
+    if (oninit) {
+      const [functionName] = oninit.split("(") ?? [""];
+      const action = node.actions[functionName!];
+      if (action) {
+        evaluate(oninit, {
+          [functionName!]: action.bind(node.element)({
+            state: node.state,
+            rootState: node.rootState,
+            event: null,
+          }),
+          ...node.stateValues,
+        });
+      }
+    }
+
+    const init = node.element.dataset.init ?? "";
+    if (init) {
+      evaluate(
+        init,
+        (node.element as HTMLElement & { state: State<{}> }).state
+      );
+    }
+
     let i = node.handlerKeys.length;
     while (i--) {
       const key = node.handlerKeys[i] ?? "";
       const value = node.element.dataset[key] ?? "";
+
+      if (key.startsWith(":")) {
+        node.element.setAttribute(
+          key.substring(1),
+          evaluateReturn(`\`${value!}\``, node.stateValues)
+        );
+        continue;
+      }
+
+      if (key.startsWith("on")) {
+        const event = key as keyof GlobalEventHandlers;
+        if (typeof node.element[event] == "undefined") continue;
+
+        const [functionName] = value!.split("(") ?? [""];
+        const action = node.actions[functionName!];
+        if (!action) continue;
+
+        node.element[event] = function (event: unknown) {
+          evaluate(value!, {
+            [functionName!]: action.bind(node.element)({
+              state: node.state,
+              rootState: node.rootState,
+              event: event,
+            }),
+            ...node.stateValues,
+          });
+        };
+
+        continue;
+      }
       let updateHandler = handlers[key]?.update;
 
       if (node.plugins) {
@@ -218,7 +280,9 @@ export function initTree<T extends State<{}>>({
       }
 
       const init = currentNode.dataset.init ?? "";
-      evaluate(init, currentNode.state);
+      if (init) {
+        evaluate(init, currentNode.state);
+      }
 
       for (const [key, value] of Object.entries(currentNode.dataset)) {
         if (key.startsWith(":")) {
@@ -226,6 +290,8 @@ export function initTree<T extends State<{}>>({
             key.substring(1),
             evaluateReturn(`\`${value!}\``, node.stateValues)
           );
+          node.handlerKeys.push(key);
+          continue;
         }
 
         if (key.startsWith("on")) {
@@ -246,6 +312,7 @@ export function initTree<T extends State<{}>>({
               ...node.stateValues,
             });
           };
+          node.handlerKeys.push(key);
           continue;
         }
 
