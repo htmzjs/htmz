@@ -87,38 +87,6 @@ export class HTMZProp<T> {
   }
 
   update(node: HTMZNode) {
-    const watch = node.element.dataset.watch ?? "";
-    if (watch) {
-      for (const prop of watch.split(",")) {
-        const state = node.state[prop as keyof typeof node.state]!;
-        state.addNode(node);
-      }
-    }
-
-    const oninit = node.element.dataset.oninit ?? "";
-    if (oninit) {
-      const [functionName] = oninit.split("(") ?? [""];
-      const action = node.actions[functionName!];
-      if (action) {
-        evaluate(oninit, {
-          [functionName!]: action.bind(node.element)({
-            state: node.state,
-            rootState: node.rootState,
-            event: null,
-          }),
-          ...node.stateValues,
-        });
-      }
-    }
-
-    const init = node.element.dataset.init ?? "";
-    if (init) {
-      evaluate(
-        init,
-        (node.element as HTMLElement & { state: State<{}> }).state
-      );
-    }
-
     let i = node.handlerKeys.length;
     while (i--) {
       const key = node.handlerKeys[i] ?? "";

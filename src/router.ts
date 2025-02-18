@@ -108,8 +108,23 @@ export class Router<T extends State<{}>> {
 
     Router.navigateTo(location.pathname);
 
-    window.addEventListener("popstate", () => {
-      Router.navigateTo(location.pathname);
+    window.addEventListener("popstate", (e) => {
+      const url = document.location.pathname;
+      const route =
+        Router.routes[url]! ?? matchDynamicRoute(Router.routes, url);
+      Router.components["router-outlet"] = route.component;
+
+      const { $params } = setState({
+        $params: route.params,
+      });
+
+      initTree({
+        root: Router.root,
+        state: { ...Router.state, $params },
+        actions: Router.actions,
+        components: Router.components,
+        plugins: Router.plugins,
+      });
     });
   }
 
