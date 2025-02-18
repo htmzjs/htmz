@@ -1,5 +1,5 @@
 import { type HTMZProp } from "./htmz";
-import { type Route } from "./router";
+import { type Route, type Routes } from "./router";
 import { type State } from "./state";
 
 export function evaluate(expression: string, data: {}) {
@@ -54,4 +54,16 @@ export function matchUrlToDynamicRoute(
     path: url,
     params: { ...route.params, ...params },
   };
+}
+
+export function matchDynamicRoute(routes: Routes, url?: string): Route | null {
+  if (!url) return null;
+
+  for (const [, route] of Object.entries(routes)) {
+    const value = matchUrlToDynamicRoute(url, route);
+    if (!value) continue;
+    return value;
+  }
+
+  return null;
 }
