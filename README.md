@@ -1,4 +1,4 @@
-  # HTMZ.js
+![<!> htmz](./htmz.png)
 
 Enhance your HTML with seamless reactivity! A lightweight and efficient library for building dynamic web interfaces.
 
