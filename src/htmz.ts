@@ -146,10 +146,6 @@ export class HTMZProp<T> {
   }
 }
 
-export type HTMZPropRecord<T extends Record<string, unknown>> = {
-  [K in keyof T]: { get value(): T[K]; set value(value: T[K]) };
-};
-
 export type handler = (
   data: { key: string; value: string },
   node: HTMZNode

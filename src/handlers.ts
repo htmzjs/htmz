@@ -170,7 +170,9 @@ export const handlers: Plugins = {
         };
 
         const state = firstElementChild.dataset.state || "{}";
-        const newProps = `$key:${key},${variableName}:'${object[key]}'}`;
+        const newProps = `$key:${JSON.stringify(
+          key
+        )},${variableName}:'${JSON.stringify(object[key])}'}`;
 
         const newState = state.replace(/\}$/, `,${newProps}`);
         // Replace to "{" if newState start with "{,"
@@ -196,7 +198,9 @@ export const handlers: Plugins = {
         };
 
         const state = firstElementChild.dataset.state || "{}";
-        const newProps = `$key:${key},${variableName}:'${object[key]}'}`;
+        const newProps = `$key:${JSON.stringify(
+          key
+        )},${variableName}:'${JSON.stringify(object[key])}'}`;
 
         const newState = state.replace(/\}$/, `,${newProps}`);
         // Replace to "{" if newState start with "{,"
@@ -269,7 +273,7 @@ export const handlers: Plugins = {
       const state = node.state[data.value];
       if (!state) return;
       const element = node.element as HTMLInputElement;
-      state.value = element.value;
+      state.value = element.defaultValue;
       element.oninput = function (e: Event) {
         state.value = (e.target as HTMLInputElement).value;
       };

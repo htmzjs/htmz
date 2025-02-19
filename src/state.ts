@@ -1,4 +1,8 @@
-import { HTMZProp, type HTMZPropRecord } from "./htmz";
+import { HTMZProp } from "./htmz";
+
+type HTMZPropRecord<T extends Record<string, unknown>> = {
+  [K in keyof T]: { get value(): T[K]; set value(value: T[K]) };
+};
 
 export function setState<T extends {}>(state: T | (() => T)) {
   const newState: Record<string, unknown> = {};
