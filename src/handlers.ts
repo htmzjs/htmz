@@ -273,7 +273,7 @@ export const handlers: Plugins = {
       const state = node.state[data.value];
       if (!state) return;
       const element = node.element as HTMLInputElement;
-      state.value = element.defaultValue;
+      element.value = state.value as string;
       element.oninput = function (e: Event) {
         state.value = (e.target as HTMLInputElement).value;
       };
