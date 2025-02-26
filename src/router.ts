@@ -1,90 +1,81 @@
-import { initTree, type ComponentConstructor, type Plugins } from "./htmz";
-import { setState, type Actions, type State } from "./state";
-import { matchDynamicRoute, toKebabCase } from "./utils";
+import { Component, type ComponentConstructor } from "./component";
+import { init, type Plugins } from "./htmz";
+import { effect, reactive } from "./reactive";
+import { isFunction, matchDynamicRoute } from "./utils";
 
-export interface Route {
-  path: string;
-  component: ComponentConstructor | (() => Promise<ComponentConstructor>);
-  params?: Record<string, string>;
-}
+export type Params = Record<string, unknown>;
 
-export type Routes = Record<string, Route>;
+export type Path = `/${string}`;
 
-export function createRoutes(routes: Route[]): Routes {
-  return routes.reduce((routes, route) => {
-    return { ...routes, [route.path]: route };
-  }, {});
-}
+export type Routes = Record<
+  Path,
+  {
+    component:
+      | ComponentConstructor
+      | ((this: { params: Params }) => Promise<ComponentConstructor>);
+    params?: Params;
+  }
+>;
 
-export interface RouterConfig<T extends State<{}>> {
-  app: ComponentConstructor;
-  state?: T;
-  actions?: Actions<T>;
-  components?: Record<
-    string,
-    ComponentConstructor | (() => Promise<ComponentConstructor>)
-  >;
-  plugins?: Plugins;
-}
+class Router {
+  static components: {
+    view?: ComponentConstructor | (() => Promise<ComponentConstructor>);
+  } = reactive({});
 
-export class Router<T extends State<{}>> {
-  app;
-  static root: HTMLElement | ShadowRoot;
-  static state: State<{}>;
-  static actions: Actions<{}>;
-  static components: Record<
-    string,
-    ComponentConstructor | (() => Promise<ComponentConstructor>)
-  >;
-  static plugins?: Plugins;
+  static params: {};
+
+  static plugins: Plugins = {
+    routerView: function ({ plugins, element, config, scopes, rootState }) {
+      effect(async function () {
+        let componentConstructor = Router.components
+          .view as ComponentConstructor;
+
+        if (isFunction(componentConstructor)) {
+          componentConstructor = await (componentConstructor as Function)();
+        }
+
+        const component = Component.create(componentConstructor);
+
+        init(component.root!)
+          .state(rootState, ...(scopes ?? []), component.state, {
+            $params: Router.params,
+          })
+          .plugins({ ...plugins, ...component.plugins })
+          .config({ ...config, ...component._config })
+          .components(Component.components)
+          .walk();
+
+        element.replaceChildren(component.host!);
+      });
+    },
+  };
+
   static routes: Routes = {};
-  constructor({
-    app,
-    state = {} as T,
-    actions = {},
-    components = {},
-    plugins,
-  }: RouterConfig<T>) {
-    this.app = app;
-    Router.state = state;
-    Router.actions = {
-      ...actions,
-      navigateTo() {
-        return (url?: string, data: unknown = null) => {
-          Router.navigateTo(url, data);
-        };
-      },
-    };
-    Router.components = components;
-    Router.plugins = plugins;
+
+  static state = {};
+
+  static app: Component<{}>;
+
+  constructor(app: ComponentConstructor) {
+    Router.app = Component.create(app);
   }
 
-  setState(data: {}) {
-    Router.state = setState(data);
+  state(data: {}) {
+    Router.state = data;
     return this;
   }
 
-  setActions(actions: Actions<T>) {
-    Router.actions = {
-      ...actions,
-      navigateTo() {
-        return (url?: string, data: unknown = null) => {
-          Router.navigateTo(url, data);
-        };
-      },
-    };
+  routes(routes: Routes) {
+    Router.routes = routes;
     return this;
   }
 
-  setRoutes(routes: Route[]) {
-    Router.routes = routes.reduce((routes, route) => {
-      return { ...routes, [route.path]: route };
-    }, {});
-
+  plugins(plugins: Plugins) {
+    Router.plugins = { ...Router.plugins, ...plugins };
     return this;
   }
 
-  setComponents(
+  components(
     components: Record<
       string,
       ComponentConstructor | (() => Promise<ComponentConstructor>)
@@ -94,61 +85,64 @@ export class Router<T extends State<{}>> {
     return this;
   }
 
-  setPlugins(plugins: Plugins) {
-    Router.plugins = plugins;
-    return this;
-  }
+  mount(selectors: string | Element) {
+    const root =
+      selectors instanceof Element
+        ? selectors
+        : document.querySelector(selectors)!;
 
-  createApp(root: Element) {
-    customElements.define(toKebabCase(this.app.name), this.app);
-    root.appendChild(new this.app());
+    root.appendChild(Router.app.host!);
 
-    Router.root = this.app.root!;
-    this.app.root = null;
+    Router.navigate(location.pathname as Path);
 
-    Router.navigateTo(location.pathname);
+    init(Router.app.root!)
+      .config(Router.app._config)
+      .state({ $navigate: navigate }, Router.state, Router.app.state)
+      .plugins({ ...Router.plugins, ...Router.app.plugins })
+      .components(Component.components)
+      .walk();
 
     window.addEventListener("popstate", (e) => {
-      const url = document.location.pathname;
-      const route =
-        Router.routes[url]! ?? matchDynamicRoute(Router.routes, url);
-      Router.components["router-outlet"] = route.component;
-
-      const { $params } = setState({
-        $params: route.params,
-      });
-
-      initTree({
-        root: Router.root,
-        state: { ...Router.state, $params },
-        actions: Router.actions,
-        components: Router.components,
-        plugins: Router.plugins,
-      });
+      const path = location.pathname as Path;
+      Router.navigate(path, null, "none");
     });
   }
 
-  static navigateTo(url?: string, data: unknown = null) {
+  private static navigateType = {
+    replace(path: Path, data: unknown) {
+      history.replaceState(data, "", path);
+    },
+    push(path: Path, data: unknown) {
+      history.pushState(data, "", path);
+    },
+    back() {
+      history.back();
+    },
+    none() {},
+  };
+
+  static navigate(
+    path?: Path,
+    data: unknown = null,
+    type: keyof typeof Router.navigateType = "push"
+  ) {
     const route =
-      this.routes[url || "/"]! ?? matchDynamicRoute(this.routes, url);
-    this.components["router-outlet"] = route.component;
+      Router.routes[path as Path]! ?? matchDynamicRoute(Router.routes, path);
 
-    const { $params } = setState({
-      $params: route.params,
-    });
+    Router.params = route.params ?? {};
 
-    initTree({
-      root: this.root,
-      state: { ...this.state, $params },
-      actions: this.actions,
-      components: this.components,
-      plugins: this.plugins,
-    });
+    Router.components.view = isFunction(route.component)
+      ? (route.component as Function).bind({ params: route.params })
+      : route.component;
 
-    history.pushState(data, "", url);
+    Router.navigateType[type](path!, data);
   }
 }
 
-export function createRouter<T extends State<{}>>(config: RouterConfig<T>) {
-  return new Router(config);
+export function initRouter(app: ComponentConstructor) {
+  return new Router(app);
+}
+
+export function navigate(url?: Path, data: unknown = null) {
+  Router.navigate(url, data);
 }

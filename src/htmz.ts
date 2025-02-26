@@ -1,294 +1,157 @@
+import { type Components } from "./component";
 import { handlers } from "./handlers";
-import { setState, type Action, type Actions, type State } from "./state";
-import { evaluate, evaluateReturn, extractValues } from "./utils";
+import { effect, reactive, type State } from "./reactive";
+import {
+  createScopedState,
+  evalReturn,
+  evaluate,
+  type ScopedState,
+} from "./utils";
 
-export interface ComponentConstructor {
-  new (...params: any[]): HTMLElement;
-  root: HTMLElement | ShadowRoot | null;
-  state: State<any>;
-  actions: Actions<any>;
-}
-
-const shadowRootModes = {
-  closed: function (this: HTMLElement) {
-    Component.root = this.attachShadow({ mode: "closed" });
-  },
-  open: function (this: HTMLElement) {
-    Component.root = this.attachShadow({ mode: "open" });
-  },
-  none: function (this: HTMLElement) {
-    Component.root = this;
-  },
+export type NodeWithScopes<element extends Node = HTMLElement> = element & {
+  scopes?: State[];
 };
 
-export class Component extends HTMLElement {
-  static root: HTMLElement | ShadowRoot | null;
-  static state: State<any> = {};
-  static actions: Actions<State<any>> = {};
+export type Plugin = ({}: {
+  element: HTMLElement;
+  scopedState: ScopedState;
+  rootState: State;
+  scopes: State[];
+  config: HTMZConfig;
+  plugins: Plugins;
+  components: Components;
+}) => void;
 
-  constructor(
-    {
-      shadowRootMode = "closed",
-      template = "",
-    }: {
-      shadowRootMode?: keyof typeof shadowRootModes;
-      template?: string;
-    } = { template: "", shadowRootMode: "closed" }
-  ) {
-    super();
-    shadowRootModes[shadowRootMode].bind(this)();
-    Component.root!.setHTMLUnsafe(template);
-  }
+export type Plugins = Record<string, Plugin>;
+
+export interface HTMZConfig {
+  deleteDirectives?: boolean;
+  deleteScopes?: boolean;
 }
 
-export class HTMZNode {
-  handlerKeys: string[] = [];
-  state;
-  rootState;
-  stateValues;
-  element;
-  actions;
-  components;
-  plugins;
+const defaultHTMZConfig: HTMZConfig = {
+  deleteDirectives: true,
+  deleteScopes: true,
+};
 
-  constructor(
-    element: HTMLElement,
-    state: Record<string, HTMZProp<unknown>>,
-    rootState: Record<string, HTMZProp<unknown>>,
-    stateValues: Record<string, unknown>,
-    actions: Record<string, Action<{}>>,
-    components: Record<
-      string,
-      ComponentConstructor | (() => Promise<ComponentConstructor>)
-    >,
-    plugins?: Plugins
-  ) {
-    this.element = element;
-    this.state = state;
-    this.rootState = rootState;
-    this.stateValues = stateValues;
-    this.actions = actions;
-    this.components = components;
-    this.plugins = plugins;
-  }
-}
-
-export class HTMZProp<T> {
-  private nodes = new Map<HTMZNode, HTMZNode>();
-  private _value;
-
-  constructor(value: T) {
-    this._value = value;
+class HTMZ<T extends State = {}> {
+  root;
+  _state: T = {} as T;
+  _components: Components = {};
+  _plugins: Plugins = {};
+  _config: HTMZConfig = defaultHTMZConfig;
+  constructor(selectors: string | Node) {
+    this.root =
+      selectors instanceof Node ? selectors : document.querySelector(selectors);
   }
 
-  addNode(node: HTMZNode) {
-    this.nodes.set(node, node);
-    this.update(node);
+  state(...state: T[]) {
+    this._state = createScopedState(state) as T;
+    return this;
   }
 
-  update(node: HTMZNode) {
-    let i = node.handlerKeys.length;
-    while (i--) {
-      const key = node.handlerKeys[i] ?? "";
-      const value = node.element.dataset[key] ?? "";
+  plugins(plugins: Plugins) {
+    this._plugins = plugins;
+    return this;
+  }
+  config(config: HTMZConfig) {
+    this._config = { ...this._config, ...config };
+    return this;
+  }
 
-      if (key.startsWith(":")) {
-        node.element.setAttribute(
-          key.substring(1),
-          evaluateReturn(`\`${value!}\``, node.stateValues)
+  components(components: Components) {
+    this._components = components;
+    return this;
+  }
+
+  walk() {
+    const walker = document.createTreeWalker(this.root!);
+
+    while (walker.nextNode()) {
+      const currentNode = walker.currentNode! as NodeWithScopes;
+
+      if (currentNode instanceof HTMLElement) {
+        const parentNode = currentNode.parentNode as NodeWithScopes;
+        const parentScopes = parentNode.scopes;
+
+        if (!currentNode.scopes) currentNode.scopes = [];
+        currentNode.scopes.unshift(...(parentScopes ?? []));
+
+        currentNode.scopes.push({
+          $element: currentNode,
+          $select: (selectors: string) => currentNode.querySelector(selectors),
+          $selectAll: (selectors: string) =>
+            currentNode.querySelectorAll(selectors),
+        });
+
+        const datasetState = currentNode.dataset.state ?? "{}";
+
+        const data = reactive(
+          evalReturn(datasetState).bind(
+            createScopedState([this._state, ...currentNode.scopes])
+          )()
         );
-        continue;
-      }
 
-      if (key.startsWith("on")) {
-        const event = key as keyof GlobalEventHandlers;
-        if (typeof node.element[event] == "undefined") continue;
+        currentNode.scopes.push(data);
 
-        const [functionName] = value!.split("(") ?? [""];
-        const action = node.actions[functionName!];
-        if (!action) continue;
+        const currentScopes = currentNode.scopes;
 
-        node.element[event] = function (event: unknown) {
-          evaluate(value!, {
-            [functionName!]: action.bind(node.element)({
-              state: node.state,
-              rootState: node.rootState,
-              event: event,
-            }),
-            ...node.stateValues,
-          });
-        };
+        const scopedState = createScopedState([this._state, ...currentScopes]);
 
-        continue;
-      }
-      let updateHandler = handlers[key]?.update;
+        const init = currentNode.dataset.init ?? "";
+        if (init) evaluate(init).bind(scopedState)();
 
-      if (node.plugins) {
-        updateHandler = node.plugins[key]?.update ?? updateHandler;
-      }
-
-      if (!updateHandler) continue;
-      updateHandler({ key, value }, node);
-    }
-  }
-
-  get value(): T {
-    return this._value;
-  }
-
-  set value(value: T) {
-    if (value == this.value) return;
-    this._value = value;
-    for (const [node] of this.nodes) {
-      node.stateValues = extractValues(node.state);
-      this.update(node);
-    }
-  }
-}
-
-export type handler = (
-  data: { key: string; value: string },
-  node: HTMZNode
-) => void;
-
-export interface PluginHandlers {
-  init(data: { key: string; value: string }, node: HTMZNode): void;
-  update(data: { key: string; value: string }, node: HTMZNode): void;
-}
-
-export type Plugins = Record<string, PluginHandlers>;
-
-export interface InitTreeConfig<T extends State<{}>> {
-  root: HTMLElement | ShadowRoot;
-  state?: T;
-  actions?: Actions<T>;
-  components?: Record<
-    string,
-    ComponentConstructor | (() => Promise<ComponentConstructor>)
-  >;
-  plugins?: Plugins;
-}
-
-export function initTree<T extends State<{}>>({
-  root,
-  state = {} as T,
-  actions = {},
-  components = {},
-  plugins,
-}: InitTreeConfig<T>) {
-  const walker = document.createTreeWalker(root);
-
-  while (walker.nextNode()) {
-    const currentNode = walker.currentNode! as HTMLElement & {
-      state: State<{}>;
-    };
-
-    if (currentNode instanceof HTMLElement) {
-      const parentState =
-        (currentNode.parentElement! as HTMLElement & { state: State<{}> })
-          ?.state ?? {};
-
-      const datasetState = currentNode.dataset.state ?? "{}";
-      const newDatasetState = datasetState
-        .replace(/\}$/, `,$el,$select,$selectAll}`)
-        .replace(/^\{\,/, "{");
-
-      const data = evaluateReturn(newDatasetState, {
-        ...extractValues(state),
-        ...extractValues(parentState),
-        $el: currentNode,
-        $select: (selectors: string) => currentNode.querySelector(selectors),
-        $selectAll: (selectors: string) => {
-          return currentNode.querySelectorAll(selectors);
-        },
-      });
-
-      delete currentNode.dataset.state;
-
-      currentNode.state = { ...parentState, ...setState(data) };
-
-      const newState = { ...state, ...currentNode.state };
-
-      const node = new HTMZNode(
-        currentNode,
-        newState,
-        state,
-        extractValues(newState),
-        actions as {},
-        components,
-        plugins
-      );
-
-      const watch = currentNode.dataset.watch ?? "";
-      if (watch) {
-        for (const prop of watch.split(",")) {
-          const state = node.state[prop as keyof typeof node.state]!;
-          state.addNode(node);
-        }
-      }
-
-      const oninit = currentNode.dataset.oninit ?? "";
-      if (oninit) {
-        const [functionName] = oninit.split("(") ?? [""];
-        const action = actions[functionName!];
-        if (action) {
-          evaluate(oninit, {
-            [functionName!]: action.bind(currentNode)({
-              state: node.state as T,
-              rootState: node.rootState as T,
-              event: null,
-            }),
-            ...node.stateValues,
-          });
-        }
-      }
-
-      const init = currentNode.dataset.init ?? "";
-      if (init) {
-        evaluate(init, currentNode.state);
-      }
-
-      for (const [key, value] of Object.entries(currentNode.dataset)) {
-        if (key.startsWith(":")) {
-          currentNode.setAttribute(
-            key.substring(1),
-            evaluateReturn(`\`${value!}\``, node.stateValues)
-          );
-          node.handlerKeys.push(key);
-          continue;
+        if (this._config.deleteDirectives) {
+          delete currentNode.dataset.state;
+          delete currentNode.dataset.init;
         }
 
-        if (key.startsWith("on")) {
-          const event = key as keyof GlobalEventHandlers;
-          if (typeof currentNode[event] == "undefined") continue;
+        if (this._config.deleteScopes) {
+          const nextSibling = currentNode.nextElementSibling;
 
-          const [functionName] = value!.split("(") ?? [""];
-          const action = actions[functionName!];
-          if (!action) continue;
+          if (!nextSibling?.parentNode?.isEqualNode(parentNode)) {
+            delete parentNode.scopes;
+          }
 
-          currentNode[event] = function (event: unknown) {
-            evaluate(value!, {
-              [functionName!]: action.bind(currentNode)({
-                state: node.state as T,
-                rootState: node.rootState as T,
-                event: event,
-              }),
-              ...node.stateValues,
+          if (!currentNode.firstElementChild) delete currentNode.scopes;
+        }
+
+        for (const key in currentNode.dataset) {
+          if (key.startsWith(":")) {
+            const value = currentNode.dataset[key] ?? "";
+
+            effect(function () {
+              currentNode.setAttribute(
+                key.substring(1),
+                evalReturn(`${value}`).bind(scopedState)()
+              );
             });
-          };
-          node.handlerKeys.push(key);
-          continue;
+
+            delete currentNode.dataset[key];
+          }
+
+          const handler = { ...handlers, ...this._plugins }[key];
+          if (!handler) continue;
+
+          handler({
+            element: currentNode,
+            scopedState,
+            config: this._config,
+            plugins: this._plugins,
+            scopes: currentScopes ?? [],
+            rootState: this._state,
+            components: this._components,
+          });
+
+          if (this._config.deleteDirectives) {
+            delete currentNode.dataset[key];
+          }
         }
-
-        let initHandler = handlers[key]?.init;
-
-        if (plugins) initHandler = plugins[key]?.init ?? initHandler;
-        if (!initHandler) continue;
-
-        node.handlerKeys.push(key);
-        initHandler({ key, value: value! }, node);
       }
     }
   }
-  return root;
+}
+
+export function init<State extends {} = {}>(selectors: string | Node) {
+  return new HTMZ<State>(selectors);
 }

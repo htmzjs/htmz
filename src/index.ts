@@ -1,4 +1,12 @@
+export * from "./component";
+export * from "./decorators";
 export * from "./htmz";
-export { createRouter, Router, type Route } from "./router";
-export * from "./state";
-export { evaluate, evaluateReturn, extractValues, toKebabCase } from "./utils";
+export * from "./reactive";
+export * from "./router";
+export {
+  createScopedState,
+  evalReturn,
+  evaluate,
+  isFunction,
+  toKebabCase,
+} from "./utils";
