@@ -127,8 +127,6 @@ HTMZ.js offers built-in routing to facilitate SPA development. Below is a basic 
 
 ---
 
-[example build single page applications](https://github.com/pebrianz/htmz-notes-app)
-
 ## Reactive Attributes
 
 ### `data-state`
