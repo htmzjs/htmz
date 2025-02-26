@@ -116,7 +116,7 @@ HTMZ.js offers built-in routing to facilitate SPA development. Below is a basic 
 
   htmz
     .initRouter(AppRoot)
-    .router({
+    .routes({
       "/": {
         component: HomePage,
       },
@@ -392,7 +392,7 @@ class HomePage extends htmz.Component {
 
 htmz
   .initRouter(AppRoot)
-  .router({
+  .routes({
     "/": {
       component: HomePage,
     },
