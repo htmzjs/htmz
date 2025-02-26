@@ -19,6 +19,7 @@ A lightweight library for building dynamic web interfaces and single-page applic
 - [Reactive Attributes](#reactive-attributes)
 - [API Reference](#api-reference)
 - [Component Lifecycle](#component-lifecycle)
+- [Creating Reactive State with TypeScript Decorators](#creating-reactive-state-with-typescript-decorators)
 - [License](#license)
 
 ---
@@ -458,6 +459,63 @@ class MyComponent extends htmz.Component {
   }
 }
 ```
+
+---
+
+## Creating Reactive State with TypeScript Decorators
+
+HTMZ.js also supports an alternative method for creating reactive state in your components using TypeScript decorators. This approach leverages:
+
+- **`@Define()`**: Applied to the component class to handle setup in the constructor.
+- **`@Property`**: Applied to class properties to make them reactive.
+
+### tsconfig.json Configuration
+
+Ensure that your `tsconfig.json` has the following configuration:
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    // ...other options
+  }
+}
+```
+
+### Example Usage
+
+Below is an example of a component that uses the decorators to create a reactive property named `title`. In the `connectedCallback()`, the property is updated to trigger reactivity:
+
+```typescript
+import { Component, Define, Property } from 'htmzjs';
+
+@Define()
+class MyDecoratedComponent extends Component<{}> {
+  @Property title: string = 'Initial Title';
+
+  constructor() {
+    super({
+      template: `<div data-text="this.title"></div>`
+    });
+  }
+
+  // Optional init() hook if early initialization is needed
+  init() {
+    console.log("Component initialized with title:", this.title);
+  }
+
+  connectedCallback() {
+    // Update the reactive property when the component is connected
+    this.title = 'New Title';
+  }
+}
+```
+
+In this example:
+- The `@Define()` decorator is applied to the class to ensure proper initialization.
+- The `@Property()` decorator marks the `title` property as reactive.
+- When the component is attached to the DOM, the `connectedCallback()` updates `this.title` to "New Title", which automatically updates the bound content in the template.
 
 ---
 
