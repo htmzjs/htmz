@@ -33,6 +33,7 @@ export interface ComponentConfig {
   template?: string;
   deleteDirectives?: boolean;
   deleteScopes?: boolean;
+  serializable?: boolean;
 }
 
 const defaultComponentConfig: ComponentConfig = {
@@ -42,14 +43,15 @@ const defaultComponentConfig: ComponentConfig = {
   template: "",
   deleteDirectives: true,
   deleteScopes: true,
+  serializable: false,
 };
 
 const shadowRootModeMap = {
-  closed: function (element: HTMLElement) {
-    return element.attachShadow({ mode: "closed" });
+  closed: function (element: HTMLElement, serializable: boolean) {
+    return element.attachShadow({ mode: "closed", serializable });
   },
-  open: function (element: HTMLElement) {
-    return element.attachShadow({ mode: "open" });
+  open: function (element: HTMLElement, serializable: boolean) {
+    return element.attachShadow({ mode: "open", serializable });
   },
   none: function (element: HTMLElement) {
     return element;
@@ -86,6 +88,8 @@ export class Component<State extends {}> {
 
   shadowRootMode: keyof typeof shadowRootModeMap;
 
+  serializable;
+
   template;
 
   plugins;
@@ -99,6 +103,7 @@ export class Component<State extends {}> {
     };
 
     this.shadowRootMode = config.shadowRootMode ?? "closed";
+    this.serializable = config.serializable ?? false;
     this.template = config.template ?? "";
     this.plugins = config.plugins ?? {};
     this._config = {
@@ -167,7 +172,10 @@ export class Component<State extends {}> {
           super();
           this.reactiveLifecycles = component.reactiveLifecycles;
           component.host = this;
-          component.root = shadowRootModeMap[component.shadowRootMode](this);
+          component.root = shadowRootModeMap[component.shadowRootMode](
+            this,
+            component.serializable
+          );
           component.root.setHTMLUnsafe(component.template);
           componentConstructor.customElementConstructor!.observedAttributes =
             componentConstructor.observedAttributes;

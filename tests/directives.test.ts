@@ -79,8 +79,6 @@ describe("Directives", () => {
       i++;
     }
 
-    console.log(div.innerHTML);
-
     expect(div.innerHTML).toBe(result.innerHTML);
   });
 
