@@ -29,6 +29,7 @@ class Router {
       effect(async function () {
         let componentConstructor = Router.components
           .view as ComponentConstructor;
+        if (!componentConstructor) return;
 
         if (isFunction(componentConstructor)) {
           componentConstructor = await (componentConstructor as Function)();
@@ -36,7 +37,7 @@ class Router {
 
         const component = Component.create(componentConstructor);
 
-        init(component.root!)
+        init(component.root!, Router.win)
           .state(rootState, ...(scopes ?? []), component.state, {
             $params: Router.params,
           })
@@ -56,13 +57,23 @@ class Router {
 
   static app: Component<{}>;
 
-  constructor(app: ComponentConstructor) {
-    Router.app = Component.create(app);
-  }
+  static doc: Document;
 
-  state(data: {}) {
-    Router.state = data;
-    return this;
+  static win: Window;
+
+  constructor(app: ComponentConstructor, win: Window = window) {
+    Router.win = win;
+    Router.doc = Router.win.document;
+    Component.win = Router.win;
+    Component.doc = Router.doc;
+    Router.app = Component.create(app);
+
+    init(Router.app.root!, Router.win)
+      .config(Router.app._config)
+      .state({ $navigate: navigate }, Router.state, Router.app.state)
+      .plugins({ ...Router.plugins, ...Router.app.plugins })
+      .components(Component.components)
+      .walk();
   }
 
   routes(routes: Routes) {
@@ -70,53 +81,31 @@ class Router {
     return this;
   }
 
-  plugins(plugins: Plugins) {
-    Router.plugins = { ...Router.plugins, ...plugins };
-    return this;
-  }
-
-  components(
-    components: Record<
-      string,
-      ComponentConstructor | (() => Promise<ComponentConstructor>)
-    >
-  ) {
-    Router.components = components;
-    return this;
-  }
-
   mount(selectors: string | Element) {
     const root =
       selectors instanceof Element
         ? selectors
-        : document.querySelector(selectors)!;
+        : Router.doc.querySelector(selectors)!;
 
     root.appendChild(Router.app.host!);
 
-    Router.navigate(location.pathname as Path);
+    Router.navigate(Router.win.location.pathname as Path);
 
-    init(Router.app.root!)
-      .config(Router.app._config)
-      .state({ $navigate: navigate }, Router.state, Router.app.state)
-      .plugins({ ...Router.plugins, ...Router.app.plugins })
-      .components(Component.components)
-      .walk();
-
-    window.addEventListener("popstate", (e) => {
-      const path = location.pathname as Path;
+    Router.win.addEventListener("popstate", (e) => {
+      const path = Router.win.location.pathname as Path;
       Router.navigate(path, null, "none");
     });
   }
 
   private static navigateType = {
     replace(path: Path, data: unknown) {
-      history.replaceState(data, "", path);
+      Router.win.history.replaceState(data, "", path);
     },
     push(path: Path, data: unknown) {
-      history.pushState(data, "", path);
+      Router.win.history.pushState(data, "", path);
     },
     back() {
-      history.back();
+      Router.win.history.back();
     },
     none() {},
   };
@@ -139,8 +128,8 @@ class Router {
   }
 }
 
-export function initRouter(app: ComponentConstructor) {
-  return new Router(app);
+export function initRouter(app: ComponentConstructor, win: Window = window) {
+  return new Router(app, win);
 }
 
 export function navigate(url?: Path, data: unknown = null) {

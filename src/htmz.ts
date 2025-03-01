@@ -1,4 +1,4 @@
-import { type Components } from "./component";
+import { Component, type Components } from "./component";
 import { handlers } from "./handlers";
 import { effect, reactive, type State } from "./reactive";
 import {
@@ -17,6 +17,8 @@ export type Plugin = ({}: {
   scopedState: ScopedState;
   rootState: State;
   scopes: State[];
+  doc: Document;
+  win: Window;
   config: HTMZConfig;
   plugins: Plugins;
   components: Components;
@@ -40,9 +42,15 @@ class HTMZ<T extends State = {}> {
   _components: Components = {};
   _plugins: Plugins = {};
   _config: HTMZConfig = defaultHTMZConfig;
-  constructor(selectors: string | Node) {
+  doc;
+  win;
+  constructor(selectors: string | Node, win: Window = window) {
+    this.win = win;
+    this.doc = this.win.document;
+    Component.win = this.win;
+    Component.doc = this.doc;
     this.root =
-      selectors instanceof Node ? selectors : document.querySelector(selectors);
+      selectors instanceof Node ? selectors : this.doc.querySelector(selectors);
   }
 
   state(...state: T[]) {
@@ -65,11 +73,10 @@ class HTMZ<T extends State = {}> {
   }
 
   walk() {
-    const walker = document.createTreeWalker(this.root!);
+    const walker = this.doc.createTreeWalker(this.root!);
 
     while (walker.nextNode()) {
       const currentNode = walker.currentNode! as NodeWithScopes;
-
       if (currentNode instanceof HTMLElement) {
         const parentNode = currentNode.parentNode as NodeWithScopes;
         const parentScopes = parentNode.scopes;
@@ -136,6 +143,8 @@ class HTMZ<T extends State = {}> {
           handler({
             element: currentNode,
             scopedState,
+            win: this.win,
+            doc: this.doc,
             config: this._config,
             plugins: this._plugins,
             scopes: currentScopes ?? [],
@@ -152,6 +161,9 @@ class HTMZ<T extends State = {}> {
   }
 }
 
-export function init<State extends {} = {}>(selectors: string | Node) {
-  return new HTMZ<State>(selectors);
+export function init<State extends {} = {}>(
+  selectors: string | Node,
+  win: Window = window
+) {
+  return new HTMZ<State>(selectors, win);
 }

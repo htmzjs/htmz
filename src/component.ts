@@ -84,6 +84,9 @@ export class Component<State extends {}> {
     },
   };
 
+  static win: Window;
+  static doc: Document;
+
   reactiveLifecycles: Lifecycles = reactive(this.lifecycles);
 
   shadowRootMode: keyof typeof shadowRootModeMap;
@@ -176,7 +179,7 @@ export class Component<State extends {}> {
             this,
             component.serializable
           );
-          component.root.setHTMLUnsafe(component.template);
+          component.root.innerHTML = component.template;
           componentConstructor.customElementConstructor!.observedAttributes =
             componentConstructor.observedAttributes;
           component.init();
@@ -206,8 +209,7 @@ export class Component<State extends {}> {
           };
         }
       };
-
-      customElements.define(
+      Component.win.customElements.define(
         toKebabCase(component.constructor.name),
         componentConstructor.customElementConstructor
       );

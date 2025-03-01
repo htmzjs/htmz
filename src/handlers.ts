@@ -11,6 +11,7 @@ export const handlers: Plugins = {
   component({
     element,
     config,
+    win,
     plugins,
     scopedState,
     scopes,
@@ -49,7 +50,7 @@ export const handlers: Plugins = {
       element.replaceChildren(component.host!);
     });
   },
-  for({ element, config, plugins, scopedState, components }) {
+  for({ element, doc, config, plugins, scopedState, components }) {
     const template = element as HTMLTemplateElement;
     const value = element.dataset.for ?? "";
 
@@ -58,7 +59,7 @@ export const handlers: Plugins = {
     effect(function () {
       const [key, json] = value.split(/\s+in\s+/);
       const object = evalReturn(json || "[]").bind(scopedState)();
-      const fragment = document.createDocumentFragment();
+      const fragment = doc.createDocumentFragment();
 
       for (const k in object) {
         const content = template.content.cloneNode(true) as DocumentFragment;
@@ -90,7 +91,7 @@ export const handlers: Plugins = {
         .components(components)
         .walk();
 
-      const tmp = document.createDocumentFragment();
+      const tmp = doc.createDocumentFragment();
 
       function nextElementSibling() {
         return template.nextElementSibling as Element & { template: Element };
@@ -126,7 +127,7 @@ export const handlers: Plugins = {
 
     element.addEventListener("input", handler);
   },
-  range({ element, config, plugins, scopedState, components }) {
+  range({ element, doc, config, plugins, scopedState, components }) {
     const template = element as HTMLTemplateElement;
     const value = element.dataset.range ?? "";
 
@@ -136,7 +137,7 @@ export const handlers: Plugins = {
       const [number, variableName] = value.split(/\s+as\s+/);
 
       const limit = evalReturn(number ?? "").bind(scopedState)();
-      const fragment = document.createDocumentFragment();
+      const fragment = doc.createDocumentFragment();
 
       let i = 0;
       while (i < limit) {
@@ -178,7 +179,7 @@ export const handlers: Plugins = {
         .plugins(plugins)
         .components(components)
         .walk();
-      const tmp = document.createDocumentFragment();
+      const tmp = doc.createDocumentFragment();
 
       function nextElementSibling() {
         return template.nextElementSibling as Element & { template: Element };
