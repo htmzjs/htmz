@@ -26,8 +26,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Set Yarn nodeLinker to pnpm
-        run: yarn config set nodeLinker pnpm
+      - name: Set Yarn enableGlobalCache to false
+        run: yarn config set enableGlobalCache false
+        
+      - name: Set Yarn cacheFolder to ./.yarn/berry/cache
+        run: yarn config set cacheFolder ./.yarn/berry/cache
         
       - name: Install Dependencies
         run: yarn
