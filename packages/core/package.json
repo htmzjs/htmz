@@ -10,7 +10,11 @@
 		"name": "Pebrian",
 		"url": "https://github.com/pebrianz"
 	},
-	"files": ["dist", "LICENSE", "README.md"],
+	"files": [
+		"dist",
+		"LICENSE",
+		"README.md"
+	],
 	"homepage": "https://github.com/htmzjs/htmz/tree/main/packages/core",
 	"bugs": "https://github.com/htmzjs/htmz/issues",
 	"repository": {
@@ -55,8 +59,8 @@
 		"json5": "^2.2.3"
 	},
 	"devDependencies": {
-		"@changesets/cli": "npm:2.29.4",
 		"@arethetypeswrong/cli": "^0.18.2",
+		"@changesets/cli": "^2.29.5",
 		"tsup": "^8.5.0",
 		"typescript": "^5.8.3",
 		"vite": "^6.3.5",

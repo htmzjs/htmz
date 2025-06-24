@@ -40,7 +40,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@biomejs/biome", "npm:1.9.4"],\
           ["@changesets/changelog-github", "npm:0.5.1"],\
-          ["@changesets/cli", "npm:2.29.4"],\
+          ["@changesets/cli", "npm:2.29.5"],\
           ["@eslint/js", "npm:9.28.0"],\
           ["@types/node", "npm:24.0.0"],\
           ["eslint", "virtual:b682ae123d44aba8b5d9b389c8a2d23a85a84af46579baa77192f223351c201cd2c1e87a338d50bf7e4deccf7f905d619c879ab0c5f605462b93761ba6453be0#npm:9.28.0"],\
@@ -225,10 +225,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@changesets/assemble-release-plan", [\
-      ["npm:6.0.8", {\
-        "packageLocation": "../.yarn/berry/cache/@changesets-assemble-release-plan-npm-6.0.8-3f575d74c8-10c0.zip/node_modules/@changesets/assemble-release-plan/",\
+      ["npm:6.0.9", {\
+        "packageLocation": "../.yarn/berry/cache/@changesets-assemble-release-plan-npm-6.0.9-e01af97ef4-10c0.zip/node_modules/@changesets/assemble-release-plan/",\
         "packageDependencies": [\
-          ["@changesets/assemble-release-plan", "npm:6.0.8"],\
+          ["@changesets/assemble-release-plan", "npm:6.0.9"],\
           ["@changesets/errors", "npm:0.2.0"],\
           ["@changesets/get-dependents-graph", "npm:2.1.3"],\
           ["@changesets/should-skip-package", "npm:0.1.2"],\
@@ -262,17 +262,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@changesets/cli", [\
-      ["npm:2.29.4", {\
-        "packageLocation": "../.yarn/berry/cache/@changesets-cli-npm-2.29.4-aeb1ee0739-10c0.zip/node_modules/@changesets/cli/",\
+      ["npm:2.29.5", {\
+        "packageLocation": "../.yarn/berry/cache/@changesets-cli-npm-2.29.5-68d8030bf3-10c0.zip/node_modules/@changesets/cli/",\
         "packageDependencies": [\
           ["@changesets/apply-release-plan", "npm:7.0.12"],\
-          ["@changesets/assemble-release-plan", "npm:6.0.8"],\
+          ["@changesets/assemble-release-plan", "npm:6.0.9"],\
           ["@changesets/changelog-git", "npm:0.2.1"],\
-          ["@changesets/cli", "npm:2.29.4"],\
+          ["@changesets/cli", "npm:2.29.5"],\
           ["@changesets/config", "npm:3.1.1"],\
           ["@changesets/errors", "npm:0.2.0"],\
           ["@changesets/get-dependents-graph", "npm:2.1.3"],\
-          ["@changesets/get-release-plan", "npm:4.0.12"],\
+          ["@changesets/get-release-plan", "npm:4.0.13"],\
           ["@changesets/git", "npm:3.0.4"],\
           ["@changesets/logger", "npm:0.1.1"],\
           ["@changesets/pre", "npm:2.0.2"],\
@@ -349,12 +349,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@changesets/get-release-plan", [\
-      ["npm:4.0.12", {\
-        "packageLocation": "../.yarn/berry/cache/@changesets-get-release-plan-npm-4.0.12-012306dbdd-10c0.zip/node_modules/@changesets/get-release-plan/",\
+      ["npm:4.0.13", {\
+        "packageLocation": "../.yarn/berry/cache/@changesets-get-release-plan-npm-4.0.13-b3e92bd592-10c0.zip/node_modules/@changesets/get-release-plan/",\
         "packageDependencies": [\
-          ["@changesets/assemble-release-plan", "npm:6.0.8"],\
+          ["@changesets/assemble-release-plan", "npm:6.0.9"],\
           ["@changesets/config", "npm:3.1.1"],\
-          ["@changesets/get-release-plan", "npm:4.0.12"],\
+          ["@changesets/get-release-plan", "npm:4.0.13"],\
           ["@changesets/pre", "npm:2.0.2"],\
           ["@changesets/read", "npm:0.6.5"],\
           ["@changesets/types", "npm:6.1.0"],\
@@ -825,6 +825,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./packages/core/",\
         "packageDependencies": [\
           ["@arethetypeswrong/cli", "npm:0.18.2"],\
+          ["@changesets/cli", "npm:2.29.5"],\
           ["@htmzjs/core", "workspace:packages/core"],\
           ["dedent", "virtual:2454b80574f21fa18907240fb7bcea725d20ebe01ec4b5b42f82f235a7e2ddb80205b594ce38849acdbeb04f90fa89911da595a1eb58dfa1ffde0541fcc15c4d#npm:1.6.0"],\
           ["json5", "npm:2.2.3"],\
@@ -841,6 +842,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./packages/router/",\
         "packageDependencies": [\
           ["@arethetypeswrong/cli", "npm:0.18.2"],\
+          ["@changesets/cli", "npm:2.29.5"],\
           ["@htmzjs/core", "workspace:packages/core"],\
           ["@htmzjs/router", "workspace:packages/router"],\
           ["dedent", "virtual:2454b80574f21fa18907240fb7bcea725d20ebe01ec4b5b42f82f235a7e2ddb80205b594ce38849acdbeb04f90fa89911da595a1eb58dfa1ffde0541fcc15c4d#npm:1.6.0"],\
@@ -3152,7 +3154,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@biomejs/biome", "npm:1.9.4"],\
           ["@changesets/changelog-github", "npm:0.5.1"],\
-          ["@changesets/cli", "npm:2.29.4"],\
+          ["@changesets/cli", "npm:2.29.5"],\
           ["@eslint/js", "npm:9.28.0"],\
           ["@types/node", "npm:24.0.0"],\
           ["eslint", "virtual:b682ae123d44aba8b5d9b389c8a2d23a85a84af46579baa77192f223351c201cd2c1e87a338d50bf7e4deccf7f905d619c879ab0c5f605462b93761ba6453be0#npm:9.28.0"],\

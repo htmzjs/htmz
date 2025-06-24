@@ -41,7 +41,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@changesets/changelog-github": "^0.5.1",
-		"@changesets/cli": "npm:2.29.4",
+		"@changesets/cli": "^2.29.5",
 		"@eslint/js": "^9.28.0",
 		"@types/node": "^24.0.0",
 		"eslint": "^9.28.0",
