@@ -32,10 +32,11 @@
 		"pnpm": "Please use yarn instead of PNPM"
 	},
 	"scripts": {
-		"root:build": "yarn workspaces foreach -A -p -t run build",
+		"root:build": "yarn workspaces foreach -A -pt run build",
 		"root:dev": "vitest",
 		"root:test": "vitest run",
 		"ci": "yarn root:build && yarn root:test",
+		"publish": "yarn workspaces foreach -A -pt npm publish",
 		"prepublishOnly": "npm run ci"
 	},
 	"devDependencies": {
