@@ -24,11 +24,8 @@ jobs:
           node-version: "20.x"
 
       - name: Enable Corepack
-        run: corepack enable
-        
-      - name: Set Yarn enableGlobalCache to false
-        run: yarn config set enableGlobalCache false
-        
+        run: corepack enable       
+      
       - name: Install Dependencies
         run: yarn
 

@@ -25,17 +25,14 @@ jobs:
 
       - name: Enable Corepack
         run: corepack enable
-
-      - name: Set Yarn enableGlobalCache to false
-        run: yarn config set enableGlobalCache false
-             
+            
       - name: Install Dependencies
         run: yarn
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
         with:
-          version: yarn changeset version
+          version: yarn dlx changeset version
           publish: yarn publish
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
