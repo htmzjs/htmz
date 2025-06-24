@@ -32,7 +32,7 @@ jobs:
         run: npm pkg delete packageManager
      
       - name: Install Dependencies
-        run: pnpm installl
+        run: pnpm install
 
       - name: Run CI
         run: pnpm pnpm:ci
