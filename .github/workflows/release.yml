@@ -27,7 +27,7 @@ jobs:
         run: corepack enable
 
       - name: Disable Global Cache Yarn PnP
-        run: yarn config enableGlobalCache false
+        run: yarn config set enableGlobalCache false
         
       - name: Install Dependencies
         run: yarn
