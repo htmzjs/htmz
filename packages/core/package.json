@@ -1,6 +1,6 @@
 {
 	"name": "@htmzjs/core",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"description": "Lightweight library for building dynamic web interfaces",
 	"type": "module",
 	"main": "dist/index.js",
@@ -10,7 +10,11 @@
 		"name": "Pebrian",
 		"url": "https://github.com/pebrianz"
 	},
-	"files": ["dist", "LICENSE", "README.md"],
+	"files": [
+		"dist",
+		"LICENSE",
+		"README.md"
+	],
 	"homepage": "https://github.com/htmzjs/htmz/tree/main/packages/core",
 	"bugs": "https://github.com/htmzjs/htmz/issues",
 	"repository": {
