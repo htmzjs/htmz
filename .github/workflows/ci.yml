@@ -26,8 +26,8 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
         
-      - name: Disable Global Cache Yarn PnP
-        run: yarn config set enableGlobalCache false
+      - name: Set Yarn nodeLinker to pnpm
+        run: yarn config set nodeLinker pnpm
 
       - name: Install Dependencies
         run: yarn
