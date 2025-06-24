@@ -27,6 +27,9 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+
+      - name: Delete packageManager
+        uses: npm pkg delete packageManager
      
       - name: Install Dependencies
         run: pnpm installl
