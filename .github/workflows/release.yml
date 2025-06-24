@@ -29,7 +29,7 @@ jobs:
           cache: 'pnpm'
            
       - name: Delete packageManager
-        uses: npm pkg delete packageManager
+        run: npm pkg delete packageManager
 
       - name: Install Dependencies
         run: pnpm install
