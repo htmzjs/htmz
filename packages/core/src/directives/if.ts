@@ -31,8 +31,7 @@ export default {
 
       const [fnName, fnArgs] = parseFunctionCall(func)
       const fn = scopedState[fnName as keyof object] as (() => void)
-      fn.apply(scopedState, fnArgs)
-
+      if (fn) fn.apply(scopedState, fnArgs)
     });
   }
 } as Directives

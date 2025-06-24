@@ -47,7 +47,8 @@ export function interpolate(text: string, data: object) {
 
 export function parseFunctionCall(str: string): [string, []] {
   const [name, strArgs] = str.trim().split(/[()]/)
-  const args = json5.parse<[]>(`[${strArgs.split(",").join(',')}]`) || []
+  if (!name) return ['', []]
+  const args = json5.parse<[]>(`[${(strArgs).split(",").join(',')}]`)
   return [name, args]
 }
 
