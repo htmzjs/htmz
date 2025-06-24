@@ -10,11 +10,7 @@
 		"name": "Pebrian",
 		"url": "https://github.com/pebrianz"
 	},
-	"files": [
-		"dist",
-		"LICENSE",
-		"README.md"
-	],
+	"files": ["dist", "LICENSE", "README.md"],
 	"homepage": "https://github.com/htmzjs/htmz/tree/main/packages/router",
 	"bugs": "https://github.com/htmzjs/htmz/issues",
 	"repository": {
@@ -35,11 +31,18 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"packageManager": "yarn@4.9.2",
+	"devEngines": {
+		"packageManager": "yarn@4.9.2"
+	},
+	"engines": {
+		"node": ">=20",
+		"yarn": "4",
+		"npm": "Please use yarn instead of NPM"
+	},
 	"scripts": {
 		"build": "tsup",
-		"dev": "yarn root:build && yarn root:dev router",
-		"test": "yarn root:test router"
+		"dev": "npm run root:dev router --include-workspace-root --if-present",
+		"test": "npm run root:test router --include-workspace-root --if-present"
 	},
 	"exports": {
 		".": {

@@ -16,18 +16,23 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: 20
+          cache: 'pnpm'
 
-      - name: Enable Corepack
-        run: corepack enable       
-      
+      - name: Delete packageManager
+        run: npm pkg delete packageManager
+     
       - name: Install Dependencies
-        run: yarn
+        run: pnpm install
 
       - name: Run CI
-        run: yarn ci
+        run: pnpm pnpm:ci
