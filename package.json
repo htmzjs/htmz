@@ -36,7 +36,7 @@
 		"root:dev": "vitest",
 		"root:test": "vitest run",
 		"ci": "yarn root:build && yarn root:test",
-		"version": "yarn dlx @changesets/cli version",
+		"version": "yarn changeset version",
 		"publish": "yarn workspaces foreach -A -pt npm publish",
 		"prepublishOnly": "npm run ci"
 	},
