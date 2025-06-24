@@ -25,7 +25,6 @@ jobs:
 
       - name: Enable Corepack
         run: corepack enable
-
         
       - name: Disable Global Cache Yarn PnP
         run: yarn config set enableGlobalCache false
