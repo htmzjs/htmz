@@ -32,7 +32,7 @@ jobs:
       - name: Create Release Pull Request
         uses: changesets/action@v1
         with:
-          version: yarn dlx changeset version
+          version: yarn version
           publish: yarn publish
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
