@@ -38,7 +38,7 @@
 		"yarn:ci": "yarn yarn:build && yarn root:test",
 		"pnpm:ci": "pnpm pnpm:build && pnpm root:test",
 		"pnpm:version": "pnpm changeset version",
-		"pnpm:publish": "pnpm publish -r --access public",
+		"pnpm:publish": "pnpm publish -r --access public --no-git-checks",
 		"prepublishOnly": "npm run pnpm:ci"
 	},
 	"devDependencies": {
