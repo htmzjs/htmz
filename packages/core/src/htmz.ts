@@ -62,10 +62,13 @@ export class HTMZ<T extends State> {
       currentNode.scopes.push(observe(json5.parse(data)));
 
       const scopedState = createScopedState([this._data, ...currentNode.scopes])
+
       const init = currentNode.getAttribute("@init")
-      const [fnName, fnArg] = parseFunctionCall(init ?? `['',[]]`)
-      const fn = scopedState[fnName as keyof object] as (() => void)
-      fn.apply(scopedState, fnArg)
+      if (init) {
+        const [fnName, fnArg] = parseFunctionCall(init ?? '') || []
+        const fn = scopedState[fnName as keyof object] as (() => void)
+        if (fn) fn.apply(scopedState, fnArg)
+      }
 
       for (const attribute of currentNode.attributes) {
         const { name, value } = attribute

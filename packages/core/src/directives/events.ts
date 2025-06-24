@@ -116,7 +116,7 @@ export default globalEvents.reduce<Directives>((events, event) => {
         const scopedState = createScopedState([rootState, ...scopes, { $event: e, $e: e }])
         const [fnName, fnArgs] = parseFunctionCall(value)
         const fn = scopedState[fnName as keyof object] as VoidFunction
-        fn.apply(scopedState, fnArgs)
+        if (fn) fn.apply(scopedState, fnArgs)
       };
 
       let cleanup: VoidFunction | null = null

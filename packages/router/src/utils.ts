@@ -1,4 +1,3 @@
-import type * as htmz from "@htmzjs/core"
 import type { Params, Path, Routes } from "."
 
 export function extractParams(
