@@ -20,10 +20,14 @@ jobs:
         with:
           node-version: "20.x"
 
-      - name: Enable corepack
+      - name: Enable Corepack
         run: corepack enable
 
-      - name: Install dependencies
+        
+      - name: Disable Global Cache Yarn PnP
+        run: yarn config set enableGlobalCache false
+
+      - name: Install Dependencies
         run: yarn
 
       - name: Run CI
