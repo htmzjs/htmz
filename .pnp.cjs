@@ -825,7 +825,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./packages/core/",\
         "packageDependencies": [\
           ["@arethetypeswrong/cli", "npm:0.18.2"],\
-          ["@changesets/cli", "npm:2.29.5"],\
           ["@htmzjs/core", "workspace:packages/core"],\
           ["dedent", "virtual:2454b80574f21fa18907240fb7bcea725d20ebe01ec4b5b42f82f235a7e2ddb80205b594ce38849acdbeb04f90fa89911da595a1eb58dfa1ffde0541fcc15c4d#npm:1.6.0"],\
           ["json5", "npm:2.2.3"],\
@@ -842,7 +841,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./packages/router/",\
         "packageDependencies": [\
           ["@arethetypeswrong/cli", "npm:0.18.2"],\
-          ["@changesets/cli", "npm:2.29.5"],\
           ["@htmzjs/core", "workspace:packages/core"],\
           ["@htmzjs/router", "workspace:packages/router"],\
           ["dedent", "virtual:2454b80574f21fa18907240fb7bcea725d20ebe01ec4b5b42f82f235a7e2ddb80205b594ce38849acdbeb04f90fa89911da595a1eb58dfa1ffde0541fcc15c4d#npm:1.6.0"],\

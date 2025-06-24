@@ -678,7 +678,6 @@ __metadata:
   resolution: "@htmzjs/core@workspace:packages/core"
   dependencies:
     "@arethetypeswrong/cli": "npm:^0.18.2"
-    "@changesets/cli": "npm:^2.29.5"
     dedent: "npm:^1.6.0"
     json5: "npm:^2.2.3"
     tsup: "npm:^8.5.0"
@@ -693,7 +692,6 @@ __metadata:
   resolution: "@htmzjs/router@workspace:packages/router"
   dependencies:
     "@arethetypeswrong/cli": "npm:^0.18.2"
-    "@changesets/cli": "npm:^2.29.5"
     "@htmzjs/core": "workspace:*"
     dedent: "npm:^1.6.0"
     json5: "npm:^2.2.3"
