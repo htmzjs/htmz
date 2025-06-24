@@ -14,6 +14,14 @@ A lightweight library for building dynamic web interfaces and single-page applic
 
 ---
 
+## Install
+
+```bash
+yarn add @htmzjs/core
+```
+
+---
+
 ## Overview
 
 ```html
