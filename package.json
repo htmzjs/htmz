@@ -1,52 +1,54 @@
 {
-  "name": "htmzjs",
-  "version": "3.0.0",
-  "type": "module",
-  "main": "./dist/index.js",
-  "author": "Pebrian",
-  "license": "MIT",
-  "keywords": [
-    "html",
-    "reactive",
-    "javascript",
-    "typescript"
-  ],
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "dev": "vitest",
-    "build": "tsup",
-    "check-exports": "attw --pack .",
-    "lint": "tsc",
-    "test": "vitest run",
-    "ci": "yarn build && yarn check-exports && yarn lint && yarn test",
-    "prepublishOnly": "npm run ci",
-    "local-release": "changeset version && changeset publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/htmzjs/htmz.git"
-  },
-  "bugs": {
-    "url": "https://github.com/htmzjs/htmz/issues"
-  },
-  "homepage": "https://github.com/htmzjs/htmz",
-  "packageManager": "yarn@4.6.0",
-  "devDependencies": {
-    "@arethetypeswrong/cli": "^0.17.3",
-    "@changesets/cli": "^2.27.12",
-    "esbuild": "^0.25.0",
-    "happy-dom": "^17.1.0",
-    "tsup": "^8.3.6",
-    "typescript": "^5.7.3",
-    "vitest": "^3.0.5"
-  },
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "import": "./dist/index.js",
-      "default": "./dist/index.cjs"
-    }
-  }
+	"name": "htmz",
+	"private": true,
+	"author": {
+		"email": "pebrianz117@gmail.com",
+		"name": "Pebrian",
+		"url": "https://github.com/pebrianz"
+	},
+	"license": "MIT",
+	"keywords": [
+		"html",
+		"reactive",
+		"javascript",
+		"typescript",
+		"js",
+		"ts",
+		"frontend",
+		"router",
+		"spa",
+		"SPAs"
+	],
+	"homepage": "https://github.com/htmzjs/htmz",
+	"bugs": "https://github.com/htmzjs/htmz/issues",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/htmzjs/htmz.git"
+	},
+	"packageManager": "yarn@4.9.2",
+	"engines": {
+		"node": ">=20.0.0",
+		"npm": "Please use yarn instead of NPM",
+		"pnpm": "Please use yarn instead of PNPM"
+	},
+	"scripts": {
+		"root:build": "yarn workspaces foreach -A -p -t run build",
+		"root:dev": "vitest",
+		"root:test": "vitest run",
+		"ci": "yarn root:build && yarn root:test",
+		"prepublishOnly": "npm run ci"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@changesets/changelog-github": "^0.5.1",
+		"@changesets/cli": "^2.27.12",
+		"@eslint/js": "^9.28.0",
+		"@types/node": "^24.0.0",
+		"eslint": "^9.28.0",
+		"happy-dom": "^18.0.1",
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.34.0",
+		"vitest": "^3.0.5"
+	},
+	"workspaces": ["packages/*"]
 }

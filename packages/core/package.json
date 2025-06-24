@@ -1,0 +1,64 @@
+{
+	"name": "@htmzjs/core",
+	"version": "0.0.0",
+	"description": "Lightweight library for building dynamic web interfaces",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"author": {
+		"email": "pebrianz117@gmail.com",
+		"name": "Pebrian",
+		"url": "https://github.com/pebrianz"
+	},
+	"files": ["dist", "LICENSE", "README.md"],
+	"homepage": "https://github.com/htmzjs/htmz/tree/main/packages/core",
+	"bugs": "https://github.com/htmzjs/htmz/issues",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/htmzjs/htmz.git"
+	},
+	"license": "MIT",
+	"keywords": [
+		"html",
+		"reactive",
+		"javascript",
+		"typescript",
+		"js",
+		"ts",
+		"frontend"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"packageManager": "yarn@4.9.2",
+	"engines": {
+		"node": ">=20.0.0",
+		"npm": "Please use yarn instead of NPM",
+		"pnpm": "Please use yarn instead of PNPM"
+	},
+	"scripts": {
+		"build": "tsup --dts-only & vite build",
+		"dev": "yarn root:dev core",
+		"test": "yarn root:test core"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.umd.cjs"
+			}
+		}
+	},
+	"dependencies": {
+		"dedent": "^1.6.0",
+		"json5": "^2.2.3"
+	},
+	"devDependencies": {
+		"@arethetypeswrong/cli": "^0.18.2",
+		"tsup": "^8.5.0",
+		"typescript": "^5.8.3",
+		"vite": "^6.3.5",
+		"vitest": "^3.2.4"
+	}
+}

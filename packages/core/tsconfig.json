@@ -1,0 +1,7 @@
+{
+	"extends": ["../../tsconfig.base.jsonc"],
+	"compilerOptions": {
+		"emitDeclarationOnly": true,
+		"typeRoots": ["types"]
+	}
+}

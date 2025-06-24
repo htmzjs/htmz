@@ -1,0 +1,57 @@
+{
+	"name": "@htmzjs/router",
+	"version": "0.0.0",
+	"description": "Router for @htmzjs/core to handle navigation",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"author": {
+		"email": "pebrianz117@gmail.com",
+		"name": "Pebrian",
+		"url": "https://github.com/pebrianz"
+	},
+	"files": ["dist", "LICENSE", "README.md"],
+	"homepage": "https://github.com/htmzjs/htmz/tree/main/packages/router",
+	"bugs": "https://github.com/htmzjs/htmz/issues",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/htmzjs/htmz.git"
+	},
+	"license": "MIT",
+	"keywords": [
+		"html",
+		"reactive",
+		"javascript",
+		"typescript",
+		"js",
+		"ts",
+		"frontend",
+		"router"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"packageManager": "yarn@4.9.2",
+	"scripts": {
+		"build": "tsup",
+		"dev": "yarn root:build && yarn root:dev router",
+		"test": "yarn root:test router"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"default": "./dist/index.cjs"
+		}
+	},
+	"dependencies": {
+		"@htmzjs/core": "workspace:*",
+		"dedent": "^1.6.0",
+		"json5": "^2.2.3"
+	},
+	"devDependencies": {
+		"@arethetypeswrong/cli": "^0.18.2",
+		"tsup": "^8.5.0",
+		"typescript": "^5.8.3",
+		"vitest": "^3.2.4"
+	}
+}

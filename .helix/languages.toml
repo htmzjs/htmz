@@ -1,0 +1,13 @@
+
+[language-server.vscode-eslint-language-server.config]
+run = "onType"
+validate = "on"
+experimental = { useFlatConfig = false }
+rulesCustomizations = []
+problems = { shortenToSingleLine = false }
+packageManager = "yarn"
+nodePath = ".yarn/sdks/eslint"
+
+[language-server.typescript-language-server.config]
+hostInfo = "helix"
+tsdk = ".yarn/sdks/typescript/lib"
